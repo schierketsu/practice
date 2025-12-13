@@ -1,13 +1,13 @@
 <template>
   <div class="bg-white dark:bg-[#1a1a1a] p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 dark:border-0" style="border-top-color: #7A3FFF; border-top-width: 6px;">
-    <div class="flex items-center justify-between mb-3 sm:mb-4">
-      <h3 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#000000] dark:text-white">
-        <span style="color: #7A3FFF">{</span> фильтр по технологиям <span style="color: #7A3FFF">}</span>
+    <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+      <h3 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-[#000000] dark:text-white leading-tight">
+        <span style="color: #7A3FFF">{</span> <span class="hidden sm:inline">фильтр по технологиям</span><span class="sm:hidden">фильтр</span> <span style="color: #7A3FFF">}</span>
       </h3>
       <button
         @click="clearFilters"
         :disabled="selectedTechnologies.length === 0"
-        class="px-3 py-2 sm:px-6 sm:py-3 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium text-sm sm:text-base"
+        class="px-2 py-1.5 sm:px-6 sm:py-3 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium text-xs sm:text-base flex-shrink-0"
         :style="selectedTechnologies.length === 0 ? 'visibility: hidden' : ''"
       >
         Сбросить

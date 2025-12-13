@@ -1,7 +1,8 @@
 <template>
   <div
     @click="goToDetail"
-    class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer overflow-hidden border border-gray-200 dark:border-white"
+    class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-md hover:shadow-xl dark:hover:shadow-2xl transition-all cursor-pointer overflow-hidden border border-gray-200 dark:border-0 dark:hover:bg-[#2a2a2a]"
+    style="border-left-color: #7A3FFF; border-left-width: 6px;"
   >
     <div class="p-4 sm:p-6">
       <div class="flex items-center gap-4 mb-4">
@@ -81,7 +82,7 @@ const sortedTechnologies = computed(() => {
 })
 
 function goToDetail() {
-  router.push(`/company/${props.company.id}`)
+  router.push(`/компания/${props.company.id}`)
 }
 
 function handleImageError(event) {

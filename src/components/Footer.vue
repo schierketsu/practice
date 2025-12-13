@@ -1,7 +1,7 @@
 <template>
   <footer class="mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <p class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold py-4 w-full flex justify-between text-[#000000] dark:text-white">
+      <p class="text-2xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold py-3 sm:py-4 w-full flex justify-between text-[#000000] dark:text-white overflow-x-auto">
         <span>п</span><span>р</span><span>а</span><span>к</span><span>т</span><span>и</span><span>к</span><span>а</span><span>с</span><span>т</span><span>у</span><span>д</span><span>е</span><span>н</span><span>т</span><span>а</span><span>м</span><span>.</span><span>р</span><span>ф</span>
       </p>
       <div class="flex flex-col sm:flex-row gap-4 py-4">
@@ -16,11 +16,11 @@
       </div>
       <Divider />
     </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div class="flex flex-col gap-1">
           <p class="text-sm text-gray-600 dark:text-white">
-            сделано с любовью к хорошим практикам <span v-if="!isDark">🧡</span><span v-else>💙</span>
+            сделано с любовью к хорошим практикам <span v-if="!isDark">💚</span><span v-else>💙</span>
           </p>
           <p class="text-sm text-gray-600 dark:text-white">©2025</p>
         </div>
