@@ -57,7 +57,7 @@
               :href="`mailto:${parsedContacts.email}`"
               class="flex-1 px-3 py-2 sm:px-6 sm:py-3 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-white text-gray-700 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium flex items-center justify-center gap-2 text-xs sm:text-base break-all"
             >
-              <img src="/iconemail.png" alt="Email" class="w-4 h-4 sm:w-6 sm:h-6 object-contain flex-shrink-0" />
+              <img :src="isDark ? '/iconemaildark.png' : '/iconemail.png'" alt="Email" class="w-4 h-4 sm:w-6 sm:h-6 object-contain flex-shrink-0" />
               <span class="truncate">{{ parsedContacts.email }}</span>
             </a>
             <a
@@ -99,11 +99,15 @@
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCompaniesStore } from '../stores/companies'
+import { useThemeStore } from '../stores/theme'
 import TechnologyTag from '../components/TechnologyTag.vue'
 
 const route = useRoute()
 const store = useCompaniesStore()
+const themeStore = useThemeStore()
 const imageError = ref(false)
+
+const isDark = computed(() => themeStore.isDark)
 
 const company = computed(() => store.getCompanyById(route.params.id))
 

@@ -6,11 +6,11 @@
       </p>
       <div class="flex flex-col sm:flex-row gap-4 py-4">
         <a href="https://t.me/schierketsu" target="_blank" rel="noopener noreferrer" class="flex-1 px-4 py-2 sm:px-6 sm:py-3 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-white text-gray-700 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base">
-          <img src="/icontelegram.png" alt="Telegram" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
+          <img :src="isDark ? '/icontelegramdark.png' : '/icontelegram.png'" alt="Telegram" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
           <span>моя телега</span>
         </a>
         <a href="mailto:crumplemi@yandex.ru" class="flex-1 px-4 py-2 sm:px-6 sm:py-3 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-white text-gray-700 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base">
-          <img src="/iconemail.png" alt="Email" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
+          <img :src="isDark ? '/iconemaildark.png' : '/iconemail.png'" alt="Email" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
           <span>отправить письмо</span>
         </a>
       </div>
