@@ -120,14 +120,10 @@ const dropdowns = ref({
   backend: false
 })
 
-const frontendTechs = ['Vue.js', 'React', 'TypeScript']
-const backendTechs = [
-  'Java', 'Spring Boot', 'C#', '.NET', 'Python',
-  'PostgreSQL', 'SQL Server', 'ClickHouse',
-  'Docker', 'Kubernetes', 'NGINX', 'BIG-IP',
-  'MQTT', 'OPC UA', 'Terraform', 'Ansible',
-  'REST API', 'Linux', 'Apache Kafka', 'Git'
-]
+// классификация технологий на фронтенд и бэкенд на основе реальных технологий компаний
+const frontendTechs = ['Vue', 'React', 'TypeScript', 'Flutter']
+const backendTechs = ['PHP', 'C#', 'C++', 'Python', 'FastAPI', 'Laravel', 'Kotlin', 'Entity']
+const otherTechs = ['Битрикс', '1C CRM']
 
 const allTechnologies = computed(() => store.allTechnologies)
 const selectedTechnologies = computed(() => store.selectedTechnologies)
@@ -137,7 +133,9 @@ const frontendTechnologies = computed(() => {
 })
 
 const backendTechnologies = computed(() => {
-  return allTechnologies.value.filter(tech => backendTechs.includes(tech)).sort()
+  return allTechnologies.value.filter(tech => 
+    backendTechs.includes(tech) || otherTechs.includes(tech)
+  ).sort()
 })
 
 function toggleDropdown(type) {
@@ -167,7 +165,7 @@ function clearFilters() {
 }
 
 function getTechStyle(tech) {
-  if (backendTechs.includes(tech)) {
+  if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
     return 'background-color: #57D900; color: #000000'
   }
   return 'background-color: #7A3FFF; color: #ffffff'

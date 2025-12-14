@@ -64,14 +64,9 @@ const router = useRouter()
 const imageError = ref(false)
 const store = useCompaniesStore()
 
-const frontendTechs = ['Vue.js', 'React', 'TypeScript']
-const backendTechs = [
-  'Java', 'Spring Boot', 'C#', '.NET', 'Python',
-  'PostgreSQL', 'SQL Server', 'ClickHouse',
-  'Docker', 'Kubernetes', 'NGINX', 'BIG-IP',
-  'MQTT', 'OPC UA', 'Terraform', 'Ansible',
-  'REST API', 'Linux', 'Apache Kafka', 'Git'
-]
+const frontendTechs = ['Vue', 'React', 'TypeScript', 'Flutter']
+const backendTechs = ['PHP', 'C#', 'C++', 'Python', 'FastAPI', 'Laravel', 'Kotlin', 'Entity']
+const otherTechs = ['Битрикс', '1C CRM']
 
 const selectedTechnologies = computed(() => store.selectedTechnologies)
 
@@ -103,7 +98,7 @@ function getTechStyle(tech) {
     return 'background-color: #F3F4F6; color: #000000'
   }
   
-  if (backendTechs.includes(tech)) {
+  if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
     return 'background-color: #57D900; color: #000000'
   }
   

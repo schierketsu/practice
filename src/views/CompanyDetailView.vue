@@ -45,6 +45,7 @@
               v-for="tech in company.technologies"
               :key="tech"
               :technology="tech"
+              :is-selected="store.selectedTechnologies.includes(tech)"
             />
           </div>
         </div>
