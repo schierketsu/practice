@@ -48,7 +48,7 @@ export const useCompaniesStore = defineStore('companies', () => {
       logo: '/keysystems.png',
       description: 'Интересует информационная безопасность и защита данных? Мы покажем тебе React для фронтенда, Python и C# для бэкенда, Entity Framework для работы с базами. Здесь ты научишься строить безопасные системы, которые защищают данные пользователей. Приходи, стань тем, кто защищает цифровой мир.',
       technologies: ['React', 'Python', 'TypeScript', 'C#', 'Entity'],
-      sector: 'Информационная безопасность',
+      sector: 'Инфобез',
       contacts: 'hr@keysystems.ru, +7 (495) 567-89-01',
       city: 'Чебоксары',
       university: 'ЧУВГУ ИМ. И. Н. УЛЬЯНОВА',

@@ -17,9 +17,9 @@ let markers = []
 const store = useCompaniesStore()
 const themeStore = useThemeStore()
 
-// Центр карты - Россия
-const defaultCenter = [61.5240, 105.3188]
-const defaultZoom = 4
+// Центр карты - Европейская часть России
+const defaultCenter = [55.5, 40.0]
+const defaultZoom = 5
 
 const filteredCompanies = computed(() => store.filteredCompanies)
 const isDark = computed(() => themeStore.isDark)
@@ -43,30 +43,50 @@ function getTechStyle(tech, isSelected) {
   return 'background-color: #7A3FFF; color: #ffffff'
 }
 
+function createCustomMarkerIcon(color = '#7A3FFF') {
+  // Создаем классический маркер-булавку фиолетового цвета (широкий)
+  const svg = `<svg width="30" height="41" viewBox="0 0 30 41" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15 0 C22.2 0, 30 6.8, 30 15 C30 24, 15 41, 15 41 C15 41, 0 24, 0 15 C0 6.8, 7.8 0, 15 0 Z" 
+          fill="${color}"/>
+    <circle cx="15" cy="15" r="7" fill="white"/>
+  </svg>`
+  
+  // Используем data URI для SVG
+  const encodedSvg = encodeURIComponent(svg)
+  const dataUri = `data:image/svg+xml;charset=utf-8,${encodedSvg}`
+  
+  return L.icon({
+    iconUrl: dataUri,
+    iconSize: [30, 41],
+    iconAnchor: [15, 41],
+    popupAnchor: [0, -35]
+  })
+}
+
 function createPopupContent(company) {
   const bgColor = isDark.value ? '#1a1a1a' : '#ffffff'
   const textColor = isDark.value ? '#ffffff' : '#000000'
   const textSecondary = isDark.value ? '#a0a0a0' : '#666666'
   const borderColor = isDark.value ? '#2a2a2a' : '#e5e7eb'
   
-  // Получаем первые 3 технологии
-  const techsToShow = company.technologies.slice(0, 3)
-  const hasMoreTechs = company.technologies.length > 3
+  // Получаем первые 2 технологии
+  const techsToShow = company.technologies.slice(0, 2)
+  const hasMoreTechs = company.technologies.length > 2
   
   // Генерируем теги технологий
   const techTags = techsToShow.map(tech => {
     const isSelected = store.selectedTechnologies.includes(tech)
     const style = getTechStyle(tech, isSelected)
-    return `<span style="display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 500; margin-right: 6px; margin-bottom: 6px; ${style}">${tech}</span>`
+    return `<span style="display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 500; margin-right: 6px; margin-bottom: 6px; line-height: 1; ${style}">${tech}</span>`
   }).join('')
   
   const moreTechsBadge = hasMoreTechs 
-    ? `<span style="display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; background-color: ${isDark.value ? '#2a2a2a' : '#F3F4F6'}; color: ${isDark.value ? '#ffffff' : '#666666'}">+${company.technologies.length - 3}</span>`
+    ? `<span style="display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 500; margin-right: 6px; margin-bottom: 6px; background-color: ${isDark.value ? '#2a2a2a' : '#F3F4F6'}; color: ${isDark.value ? '#ffffff' : '#666666'}; line-height: 1;">+${company.technologies.length - 2}</span>`
     : ''
   
   return `
-    <div style="min-width: 280px; max-width: 320px; font-family: Inter, system-ui, -apple-system, sans-serif; background-color: ${bgColor}; border-radius: 12px; overflow: hidden;">
-      <div style="padding: 16px; border-bottom: 1px solid ${borderColor};">
+    <div style="min-width: 280px; max-width: 320px; font-family: Inter, system-ui, -apple-system, sans-serif; background-color: ${bgColor}; border-radius: 12px; overflow: hidden; position: relative;">
+      <div style="padding: 16px; padding-right: 60px;">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
           <div style="width: 48px; height: 48px; border-radius: 8px; border: 1px solid ${borderColor}; background-color: ${isDark.value ? '#2a2a2a' : '#f3f4f6'}; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative;">
             <img 
@@ -84,22 +104,19 @@ function createPopupContent(company) {
             <p style="font-size: 13px; color: ${textSecondary}; margin: 0; line-height: 1.3;">${company.sector}</p>
           </div>
         </div>
-        <p style="font-size: 12px; color: ${textSecondary}; margin: 0 0 12px 0; line-height: 1.4;">${company.city}</p>
-        <div style="display: flex; flex-wrap: wrap; gap: 0; margin-bottom: 12px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 0;">
           ${techTags}
           ${moreTechsBadge}
         </div>
       </div>
-      <div style="padding: 12px 16px;">
-        <button 
-          onclick="window.location.href='/компания/${company.id}'"
-          style="width: 100%; padding: 10px 16px; background-color: #57D900; color: #000000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"
-          onmouseover="this.style.backgroundColor='#4ac000'"
-          onmouseout="this.style.backgroundColor='#57D900'"
-        >
-          Подробнее
-        </button>
-      </div>
+      <button 
+        onclick="window.location.href='/компания/${company.id}'"
+        style="position: absolute; top: 0; right: -1px; bottom: 0; width: 49px; padding-left: 12px; padding-right: 12px; background-color: #57D900; color: #000000; border: none; border-radius: 0 12px 12px 0; font-weight: 700; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; z-index: 10; margin: 0;"
+        onmouseover="this.style.backgroundColor='#4ac000'"
+        onmouseout="this.style.backgroundColor='#57D900'"
+      >
+        <img src="/arrowright.png" alt="→" style="width: auto; height: auto; max-width: 24px; max-height: 24px; display: block;" />
+      </button>
     </div>
   `
 }
@@ -151,41 +168,54 @@ function updateMarkers() {
   })
   markers = []
 
-  // Добавляем новые маркеры
-  filteredCompanies.value.forEach(company => {
-    if (company.coordinates && company.coordinates.lat && company.coordinates.lng) {
-      const marker = L.marker([company.coordinates.lat, company.coordinates.lng], {
-        icon: L.icon({
-          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41]
+  // Добавляем маркеры только если выбран факультет
+  if (store.selectedFaculty) {
+    filteredCompanies.value.forEach((company) => {
+      if (company.coordinates && company.coordinates.lat && company.coordinates.lng) {
+        // Все маркеры фиолетовые
+        const markerColor = '#7A3FFF'
+        const marker = L.marker([company.coordinates.lat, company.coordinates.lng], {
+          icon: createCustomMarkerIcon(markerColor)
         })
-      })
 
-      // Создаем попап с информацией об организации
-      const popupContent = createPopupContent(company)
+        // Создаем попап с информацией об организации
+        const popupContent = createPopupContent(company)
 
-      marker.bindPopup(popupContent, {
-        maxWidth: 320,
-        className: isDark.value ? 'dark-popup' : 'light-popup'
-      })
-      marker.addTo(map)
-      markers.push(marker)
-    }
-  })
+        marker.bindPopup(popupContent, {
+          maxWidth: 320,
+          className: isDark.value ? 'dark-popup' : 'light-popup',
+          autoPan: true
+        })
+        marker.addTo(map)
+        markers.push(marker)
+      }
+    })
+  }
 
-  // Если есть маркеры, подгоняем границы карты
-  if (markers.length > 0) {
-    const group = new L.featureGroup(markers)
-    map.fitBounds(group.getBounds().pad(0.1))
+  // Определяем область отображения карты
+  if (!store.selectedCity) {
+    // Если выбран "все города", показываем европейскую часть России
+    map.setView(defaultCenter, defaultZoom)
   } else {
-    // Если маркеров нет или не выбран город, показываем всю Россию
-    if (!store.selectedCity) {
-      map.setView(defaultCenter, defaultZoom)
+    // Если выбран конкретный город
+    const cityCompanies = store.companies.filter(company => company.city === store.selectedCity)
+    const cityCoordinates = cityCompanies
+      .filter(company => company.coordinates && company.coordinates.lat && company.coordinates.lng)
+      .map(company => [company.coordinates.lat, company.coordinates.lng])
+    
+    if (cityCoordinates.length > 0) {
+      if (markers.length > 0) {
+        // Если есть маркеры, подгоняем границы карты под них
+        const group = new L.featureGroup(markers)
+        map.fitBounds(group.getBounds().pad(0.1))
+      } else {
+        // Если маркеров нет, но есть координаты компаний в городе, приближаем к городу
+        const avgLat = cityCoordinates.reduce((sum, coord) => sum + coord[0], 0) / cityCoordinates.length
+        const avgLng = cityCoordinates.reduce((sum, coord) => sum + coord[1], 0) / cityCoordinates.length
+        map.setView([avgLat, avgLng], 12)
+      }
     } else {
+      // Если координат нет, показываем европейскую часть России
       map.setView(defaultCenter, defaultZoom)
     }
   }
@@ -228,14 +258,30 @@ onUnmounted(() => {
 :deep(.leaflet-popup-tip) {
   background: white;
   border: 1px solid #e5e7eb;
+  border-radius: 4px;
 }
 
 .dark :deep(.leaflet-popup-tip) {
   background: #1a1a1a;
   border: 1px solid #2a2a2a;
+  border-radius: 4px;
 }
 
 :deep(.leaflet-control-attribution) {
   display: none !important;
+}
+
+:deep(.leaflet-popup-close-button) {
+  display: none !important;
+}
+
+/* Стили для кнопки в попапе, чтобы убрать белую линию */
+:deep(.leaflet-popup-content-wrapper .leaflet-popup-content > div > button) {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  margin: 0 !important;
+  z-index: 10 !important;
 }
 </style>
