@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router'
 import { useThemeStore } from './stores/theme'
 import './style.css'
+import 'leaflet/dist/leaflet.css'
 
 const pinia = createPinia()
 const app = createApp(App)
