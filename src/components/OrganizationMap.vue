@@ -148,13 +148,30 @@ watch(filteredCompanies, () => {
   updateMarkers()
 }, { deep: true })
 
+// Функция для обновления стилей tip
+function updateTipStyles() {
+  const tips = document.querySelectorAll('.leaflet-popup-tip')
+  tips.forEach(tip => {
+    if (isDark.value) {
+      tip.style.setProperty('background', '#1a1a1a', 'important')
+      tip.style.setProperty('border-color', '#2a2a2a', 'important')
+    } else {
+      tip.style.setProperty('background', 'white', 'important')
+      tip.style.setProperty('border-color', '#e5e7eb', 'important')
+    }
+  })
+}
+
 // Обновление маркеров при изменении темы или выбранных технологий
 watch([isDark, () => store.selectedTechnologies], () => {
   updateMarkers()
-  // Перезагружаем размер карты при изменении темы
+  // Обновляем стили tip для открытых попапов
   setTimeout(() => {
     if (map) {
       map.invalidateSize()
+      updateTipStyles()
+      // Повторно обновляем через небольшую задержку для надежности
+      setTimeout(updateTipStyles, 50)
     }
   }, 100)
 }, { deep: true })
@@ -186,6 +203,14 @@ function updateMarkers() {
           className: isDark.value ? 'dark-popup' : 'light-popup',
           autoPan: true
         })
+        
+        // Обновляем стили tip при открытии попапа
+        marker.on('popupopen', () => {
+          setTimeout(() => {
+            updateTipStyles()
+          }, 10)
+        })
+        
         marker.addTo(map)
         markers.push(marker)
       }
@@ -259,11 +284,13 @@ onUnmounted(() => {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 4px;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 
+:deep(.dark .leaflet-popup-tip),
 .dark :deep(.leaflet-popup-tip) {
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background: #1a1a1a !important;
+  border: 1px solid #2a2a2a !important;
   border-radius: 4px;
 }
 

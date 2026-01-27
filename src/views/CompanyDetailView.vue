@@ -1,17 +1,14 @@
 <template>
   <div class="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-    <button
-      @click="$router.push('/практики')"
-      class="mb-4 sm:mb-6 px-3 py-2 sm:px-6 sm:py-3 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium flex items-center justify-center gap-2 text-xs sm:text-base"
-    >
-      <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-      </svg>
-      <span>Назад к списку</span>
-    </button>
-
-    <div v-if="company" class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden border border-gray-200 dark:border-white">
-      <div class="p-4 sm:p-6 lg:p-8">
+    <div v-if="company" class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden relative">
+      <button
+        @click="$router.push('/практики')"
+        class="absolute top-4 sm:top-6 lg:top-8 left-[-1px] w-[49px] h-14 sm:h-24 pl-3 pr-3 bg-[#57D900] text-[#000000] border-none rounded-l-lg font-bold cursor-pointer transition-colors flex items-center justify-center z-10 m-0 hover:bg-[#4ac000]"
+        style="border-radius: 12px 0 0 12px;"
+      >
+        <img src="/arrowleft.png" alt="←" class="w-auto h-auto max-w-[24px] max-h-[24px] block" />
+      </button>
+      <div class="pt-4 pr-4 pb-4 sm:pt-6 sm:pr-6 sm:pb-6 lg:pt-8 lg:pr-8 lg:pb-8 pl-[60px]">
         <div class="flex items-center gap-3 sm:gap-6 mb-4 sm:mb-6">
           <div class="w-14 h-14 sm:w-24 sm:h-24 rounded-lg border border-gray-200 dark:border-none bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0">
             <img
