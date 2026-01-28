@@ -61,7 +61,7 @@ const isDark = computed(() => themeStore.isDark)
 
 .site-title span {
   display: inline-block;
-  transform: scaleY(1.5);
+  transform: scaleY(2);
   transform-origin: center;
   flex: 0 0 auto;
   white-space: nowrap;

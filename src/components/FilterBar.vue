@@ -1,16 +1,20 @@
 <template>
-  <div class="bg-white dark:bg-[#1a1a1a] p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 dark:border-0" style="border-top-color: #7A3FFF; border-top-width: 6px;">
-    <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+  <div class="bg-white dark:bg-[#1a1a1a] p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 dark:border-0 relative" style="border-top-color: #7A3FFF; border-top-width: 6px;">
+    <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2 pr-10 sm:pr-12">
       <h3 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-[#000000] dark:text-white leading-tight">
         <span style="color: #7A3FFF">{</span> <span class="hidden sm:inline">фильтр по технологиям</span><span class="sm:hidden">фильтр</span> <span style="color: #7A3FFF">}</span>
       </h3>
       <button
         @click="clearFilters"
         :disabled="selectedTechnologies.length === 0"
-        class="px-2 py-1.5 sm:px-6 sm:py-3 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium text-xs sm:text-base flex-shrink-0"
+        class="px-2 py-1.5 sm:px-4 sm:py-2 bg-[#7A3FFF] hover:bg-[#6a2fef] transition-colors font-medium text-xs sm:text-base flex items-center justify-center absolute top-0 right-0 rounded-bl-lg"
         :style="selectedTechnologies.length === 0 ? 'visibility: hidden' : ''"
       >
-        Сбросить
+        <img
+          src="/sbros2.png"
+          alt="Сбросить фильтры"
+          class="h-4 w-auto sm:h-5"
+        />
       </button>
     </div>
     
@@ -161,7 +165,7 @@ function toggleTechnology(tech) {
 }
 
 function clearFilters() {
-  store.clearFilters()
+  store.setTechnologiesFilter([])
 }
 
 function getTechStyle(tech) {
