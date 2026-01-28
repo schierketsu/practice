@@ -3,7 +3,7 @@
     <div v-if="company" class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden relative">
       <button
         @click="$router.push('/практики')"
-        class="absolute top-4 sm:top-6 lg:top-8 left-[-1px] w-[49px] h-14 sm:h-24 pl-3 pr-3 bg-[#57D900] text-[#000000] border-none rounded-l-lg font-bold cursor-pointer transition-colors flex items-center justify-center z-10 m-0 hover:bg-[#4ac000]"
+        class="absolute top-4 sm:top-6 lg:top-8 left-[-1px] w-[49px] h-14 sm:h-24 pl-3 pr-3 bg-[#A8E4A0] text-[#000000] border-none rounded-l-lg font-bold cursor-pointer transition-colors flex items-center justify-center z-10 m-0 hover:bg-[#A8E4A0]"
         style="border-radius: 12px 0 0 12px;"
       >
         <img src="/arrowleft.png" alt="←" class="w-auto h-auto max-w-[24px] max-h-[24px] block" />
@@ -73,7 +73,7 @@
 
         <div class="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
           <button
-            class="w-full px-4 py-2.5 sm:px-6 sm:py-3 bg-[#57D900] text-[#000000] rounded-lg hover:bg-[#4ac000] transition-colors font-semibold text-sm sm:text-base lg:text-lg"
+            class="w-full px-4 py-2.5 sm:px-6 sm:py-3 bg-[#A8E4A0] text-[#000000] rounded-lg hover:bg-[#A8E4A0] transition-colors font-semibold text-sm sm:text-base lg:text-lg"
           >
             подать заявку на практику
           </button>

@@ -1,7 +1,7 @@
 <template>
   <footer class="mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <p class="text-2xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold py-3 sm:py-4 w-full flex justify-between text-[#000000] dark:text-white overflow-x-auto">
+      <p class="site-title text-2xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold pt-3 sm:pt-4 pb-4 sm:pb-6 lg:pb-8 w-full flex justify-between text-[#000000] dark:text-white">
         <span>п</span><span>р</span><span>а</span><span>к</span><span>т</span><span>и</span><span>к</span><span>а</span><span>с</span><span>т</span><span>у</span><span>д</span><span>е</span><span>н</span><span>т</span><span>а</span><span>м</span><span>.</span><span>р</span><span>ф</span>
       </p>
       <div class="flex flex-col sm:flex-row gap-4 py-4">
@@ -42,4 +42,29 @@ import Divider from './Divider.vue'
 const themeStore = useThemeStore()
 const isDark = computed(() => themeStore.isDark)
 </script>
+
+<style scoped>
+.site-title {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  min-width: 0;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .site-title {
+    margin-bottom: 1rem;
+  }
+}
+
+.site-title span {
+  display: inline-block;
+  transform: scaleY(1.5);
+  transform-origin: center;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+</style>
 

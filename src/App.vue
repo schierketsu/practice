@@ -11,7 +11,7 @@
               <img v-if="!themeStore.isDark" src="/light.png" alt="Light" class="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
               <img v-else src="/dark.png" alt="Dark" class="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
             </button>
-            <button class="px-2 py-1.5 sm:px-6 sm:py-3 rounded-lg font-medium text-xs sm:text-base bg-[#57D900] text-[#000000] hover:bg-[#4ac000] transition-colors whitespace-nowrap">
+            <button class="px-2 py-1.5 sm:px-6 sm:py-3 rounded-lg font-medium text-xs sm:text-base bg-[#A8E4A0] text-[#000000] hover:bg-[#A8E4A0] transition-colors whitespace-nowrap">
               <span class="hidden sm:inline">мой профиль</span>
               <span class="sm:hidden">профиль</span>
             </button>
@@ -20,14 +20,14 @@
             <router-link
               v-if="$route.path !== '/стажировки'"
               to="/стажировки"
-              class="px-2 py-1.5 sm:px-6 sm:py-3 rounded-lg font-medium text-xs sm:text-base bg-[#57D900] text-[#000000] hover:bg-[#4ac000] transition-colors inline-block no-underline whitespace-nowrap"
+              class="px-2 py-1.5 sm:px-6 sm:py-3 rounded-lg font-medium text-xs sm:text-base bg-[#A8E4A0] text-[#000000] hover:bg-[#A8E4A0] transition-colors inline-block no-underline whitespace-nowrap"
             >
               стажировки
             </router-link>
             <router-link
               v-else
               to="/практики"
-              class="px-2 py-1.5 sm:px-6 sm:py-3 rounded-lg font-medium text-xs sm:text-base bg-[#57D900] text-[#000000] hover:bg-[#4ac000] transition-colors inline-block no-underline whitespace-nowrap"
+              class="px-2 py-1.5 sm:px-6 sm:py-3 rounded-lg font-medium text-xs sm:text-base bg-[#A8E4A0] text-[#000000] hover:bg-[#A8E4A0] transition-colors inline-block no-underline whitespace-nowrap"
             >
               практики
             </router-link>

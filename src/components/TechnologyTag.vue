@@ -32,7 +32,7 @@ function getTechStyle() {
   }
   
   if (backendTechs.includes(props.technology) || otherTechs.includes(props.technology)) {
-    return 'background-color: #57D900; color: #000000'
+    return 'background-color: #A8E4A0; color: #000000'
   }
   
   return 'background-color: #7A3FFF; color: #ffffff'

@@ -99,7 +99,7 @@ function getTechStyle(tech) {
   }
   
   if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
-    return 'background-color: #57D900; color: #000000'
+    return 'background-color: #A8E4A0; color: #000000'
   }
   
   return 'background-color: #7A3FFF; color: #ffffff'

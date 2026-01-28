@@ -38,7 +38,7 @@ function getTechStyle(tech, isSelected) {
   }
   
   if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
-    return 'background-color: #57D900; color: #000000'
+    return 'background-color: #A8E4A0; color: #000000'
   }
   
   return 'background-color: #7A3FFF; color: #ffffff'
@@ -112,9 +112,9 @@ function createPopupContent(company) {
       </div>
       <button 
         onclick="window.location.href='/компания/${company.id}'"
-        style="position: absolute; top: 0; right: -1px; bottom: 0; width: 49px; padding-left: 12px; padding-right: 12px; background-color: #57D900; color: #000000; border: none; border-radius: 0 12px 12px 0; font-weight: 700; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; z-index: 10; margin: 0;"
-        onmouseover="this.style.backgroundColor='#4ac000'"
-        onmouseout="this.style.backgroundColor='#57D900'"
+        style="position: absolute; top: 0; right: -1px; bottom: 0; width: 49px; padding-left: 12px; padding-right: 12px; background-color: #A8E4A0; color: #000000; border: none; border-radius: 0 12px 12px 0; font-weight: 700; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; z-index: 10; margin: 0;"
+        onmouseover="this.style.backgroundColor='#A8E4A0'"
+        onmouseout="this.style.backgroundColor='#A8E4A0'"
       >
         <img src="/arrowright.png" alt="→" style="width: auto; height: auto; max-width: 24px; max-height: 24px; display: block;" />
       </button>

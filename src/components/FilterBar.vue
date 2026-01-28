@@ -85,7 +85,7 @@
                   ? ''
                   : ''
               ]"
-              :style="selectedTechnologies.includes(tech) ? 'background-color: #57D900; color: #000000' : 'background-color: #F3F4F6; color: #000000'"
+              :style="selectedTechnologies.includes(tech) ? 'background-color: #A8E4A0; color: #000000' : 'background-color: #F3F4F6; color: #000000'"
             >
               {{ tech }}
             </button>
@@ -166,7 +166,7 @@ function clearFilters() {
 
 function getTechStyle(tech) {
   if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
-    return 'background-color: #57D900; color: #000000'
+    return 'background-color: #A8E4A0; color: #000000'
   }
   return 'background-color: #7A3FFF; color: #ffffff'
 }
