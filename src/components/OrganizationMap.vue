@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full h-full min-h-[500px] rounded-lg overflow-hidden border border-gray-200 dark:border-white">
-    <div ref="mapContainer" class="w-full h-full"></div>
+  <div class="w-full h-full min-h-[400px] sm:min-h-[500px] rounded-lg overflow-hidden border-l border-t border-b border-gray-200 dark:border-white" style="border-right: none;">
+    <div ref="mapContainer" class="w-full h-full min-h-[400px] sm:min-h-[500px]"></div>
   </div>
 </template>
 
@@ -13,6 +13,7 @@ import { useThemeStore } from '../stores/theme'
 const mapContainer = ref(null)
 let map = null
 let markers = []
+let resizeObserver = null
 
 const store = useCompaniesStore()
 const themeStore = useThemeStore()
@@ -125,22 +126,49 @@ function createPopupContent(company) {
 onMounted(() => {
   if (!mapContainer.value) return
 
-  // Создаем карту
+  // Создаем карту сразу, без лишних проверок
   map = L.map(mapContainer.value, {
     center: defaultCenter,
     zoom: defaultZoom,
     zoomControl: true
   })
 
-  // Добавляем слой Watercolor стиль через Stadia Maps (Stamen Watercolor)
-  L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg', {
+  // Добавляем слой OpenStreetMap (стандартный провайдер, работает без API ключа)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '',
-    maxZoom: 16,
-    minZoom: 1
+    maxZoom: 19,
+    minZoom: 1,
+    subdomains: ['a', 'b', 'c']
   }).addTo(map)
 
-  // Обновляем маркеры при первой загрузке
-  updateMarkers()
+  // Обновляем размеры и маркеры после небольшой задержки для применения стилей
+  setTimeout(() => {
+    if (map) {
+      map.invalidateSize()
+      updateMarkers()
+    }
+  }, 100)
+
+  // Добавляем ResizeObserver для отслеживания изменений размера контейнера
+  if (mapContainer.value && window.ResizeObserver) {
+    resizeObserver = new ResizeObserver(() => {
+      if (map) {
+        map.invalidateSize()
+      }
+    })
+    resizeObserver.observe(mapContainer.value)
+  }
+
+  // Обработчик изменения размера окна
+  const handleResize = () => {
+    if (map) {
+      map.invalidateSize()
+    }
+  }
+  window.addEventListener('resize', handleResize)
+  
+  // Сохраняем обработчик для очистки
+  map._resizeHandler = handleResize
 })
 
 // Обновление маркеров при изменении фильтров
@@ -247,6 +275,18 @@ function updateMarkers() {
 }
 
 onUnmounted(() => {
+  // Удаляем ResizeObserver
+  if (resizeObserver && mapContainer.value) {
+    resizeObserver.unobserve(mapContainer.value)
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+
+  // Удаляем обработчик изменения размера окна
+  if (map && map._resizeHandler) {
+    window.removeEventListener('resize', map._resizeHandler)
+  }
+
   if (map) {
     map.remove()
     map = null
