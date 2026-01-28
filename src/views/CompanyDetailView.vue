@@ -23,14 +23,14 @@
       <div class="pt-4 pr-4 pb-[calc(2.5rem+1px)] sm:pt-5 sm:pr-6 sm:pb-[calc(3rem+1px)] lg:pt-7 lg:pr-8 lg:pb-[calc(3rem+1px)] pl-[calc(48px+80px+12px)] sm:pl-[calc(48px+144px+24px)]">
         <div class="flex flex-col justify-start min-h-20 sm:min-h-36 mb-2 sm:mb-3">
           <h1 class="text-xl sm:text-3xl lg:text-4xl font-extrabold mb-1 leading-tight text-[#000000] dark:text-white" style="font-variant: small-caps;">{{ company.name }}</h1>
-          <p class="text-sm sm:text-lg lg:text-xl text-gray-600 dark:text-white leading-tight" style="font-variant: small-caps;">
+          <p class="text-sm sm:text-lg lg:text-xl text-gray-600 dark:text-white leading-tight">
             {{ company.sector }}
           </p>
         </div>
 
         <div class="mb-4 sm:mb-6 -ml-[calc(48px+80px+12px)] sm:-ml-[calc(48px+144px+24px)] pl-[24px] sm:pl-[48px] flex flex-col gap-4 sm:gap-6">
           <div class="w-full">
-            <h2 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3" style="font-variant: small-caps;">О КОМПАНИИ</h2>
+            <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 dark:text-white mb-2 sm:mb-3" style="font-variant: small-caps;">О КОМПАНИИ</h2>
             <p class="text-sm sm:text-base text-gray-700 dark:text-white leading-relaxed">{{ company.description }}</p>
           </div>
           <div class="w-full -mr-4 sm:-mr-6 lg:-mr-8">
@@ -67,7 +67,7 @@
     <!-- Окно с отзывами -->
     <div v-if="company" class="mt-4 sm:mt-6 bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden">
       <div class="pt-4 pr-4 pb-4 sm:pt-6 sm:pr-6 sm:pb-6 lg:pt-8 lg:pr-8 lg:pb-8 pl-4 sm:pl-6 lg:pl-8">
-        <h2 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4 sm:mb-6" style="font-variant: small-caps;">ОТКЛИКИ</h2>
+        <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 dark:text-white mb-4 sm:mb-6" style="font-variant: small-caps;">ОТКЛИКИ</h2>
         <div class="space-y-4 sm:space-y-6">
           <div
             v-for="(review, index) in reviews"
@@ -93,7 +93,12 @@
               {{ review.text }}
             </p>
             <div class="flex flex-wrap items-center gap-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
-              <span>{{ review.rating }}⭐</span>
+              <span class="flex items-center gap-1 text-sm sm:text-base">
+                {{ review.rating }}
+                <svg class="w-[1em] h-[1em]" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#fbd16a"/>
+                </svg>
+              </span>
               <span>{{ review.employment }}</span>
               <span>{{ review.location }}</span>
             </div>
