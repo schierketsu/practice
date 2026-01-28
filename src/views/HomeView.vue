@@ -108,7 +108,7 @@ function closeModal() {
 }
 
 function clearFiltersAndClose() {
-  clearFilters()
+  store.setTechnologiesFilter([])
   closeModal()
 }
 </script>
