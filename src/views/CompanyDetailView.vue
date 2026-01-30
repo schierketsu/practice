@@ -1,5 +1,6 @@
 <template>
-  <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+  <div class="py-4 sm:py-8">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
     <div v-if="company" class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden relative">
       <button
         @click="$router.push('/практики')"
@@ -53,7 +54,7 @@
       <!-- Секция "О КОМПАНИИ" -->
       <div class="-mt-2 sm:-mt-3 lg:-mt-4 pt-0 pr-4 pb-4 sm:pt-1 sm:pr-6 sm:pb-6 lg:pt-2 lg:pr-8 lg:pb-8 pl-4 sm:pl-6 lg:pl-8 flex flex-col gap-4 sm:gap-6">
         <div class="w-full">
-          <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 dark:text-white mb-2 sm:mb-3" style="font-variant: small-caps;">О КОМПАНИИ</h2>
+          <h2 class="text-xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 sm:mb-3" style="font-variant: small-caps;">О КОМПАНИИ</h2>
           <p class="text-sm sm:text-base text-gray-700 dark:text-white leading-relaxed">{{ company.description }}</p>
         </div>
         <!-- Технологии для мобильной версии - остаются на месте -->
@@ -141,11 +142,14 @@
         подать заявку на практику
       </button>
     </div>
+    </div>
 
-    <!-- Окно с отзывами -->
-    <div v-if="company" class="mt-4 sm:mt-6 bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden">
+    <!-- Окно с отзывами: точки снаружи, на всю ширину как слой с фильтрами и картой -->
+    <div v-if="company" class="reviews-dots-wrap mt-8 sm:mt-10 w-full">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="reviews-layer rounded-lg overflow-hidden">
       <div class="pt-4 pr-4 pb-4 sm:pt-6 sm:pr-6 sm:pb-6 lg:pt-8 lg:pr-8 lg:pb-8 pl-4 sm:pl-6 lg:pl-8">
-        <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 dark:text-white mb-4 sm:mb-6" style="font-variant: small-caps;">ОТКЛИКИ</h2>
+        <h2 class="text-xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-4 sm:mb-6" style="font-variant: small-caps;">ОТКЛИКИ</h2>
         <div class="space-y-4 sm:space-y-6">
           <div
             v-for="(review, index) in reviews"
@@ -183,9 +187,11 @@
           </div>
         </div>
       </div>
+      </div>
+      </div>
     </div>
 
-    <div v-if="!company" class="text-center py-12">
+    <div v-if="!company" class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 text-center py-12">
       <p class="text-gray-500 dark:text-white text-lg">Компания не найдена</p>
       <button
         @click="$router.push('/практики')"
@@ -221,7 +227,7 @@ watch(() => company.value?.id, () => {
 // Фотографии для карусели — по умолчанию 3 слайда с back3.png
 const companyImages = computed(() => {
   if (!company.value) return []
-  return ['/back31.png', '/back31.png', '/back31.png']
+  return ['/backk.png', '/backk.png', '/backk.png']
 })
 
 function nextImage() {
@@ -388,4 +394,20 @@ function handleTechImageError(event) {
 }
 </script>
 
+<style scoped>
+/* Область откликов на всю ширину, как слой с фильтрами и картой */
+.reviews-dots-wrap {
+  background-color: #fafaf8;
+  background-image: radial-gradient(circle, #000 1px, transparent 1px);
+  background-size: 20px 20px;
+  padding: 2.5rem 0;
+  box-sizing: border-box;
+}
+
+/* Белая панель откликов — обводка как у reviews-dots-wrap */
+.reviews-layer {
+  background: #fff;
+  border: 4px solid #000;
+}
+</style>
 

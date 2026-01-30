@@ -1,5 +1,5 @@
 <template>
-  <footer class="mt-auto">
+  <footer class="mt-auto" :class="{ 'footer-top-border': !isCompanyPage }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <p v-if="!isCompanyPage" class="site-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold pt-6 sm:pt-8 pb-4 sm:pb-6 lg:pb-8 w-full text-[#000000] dark:text-white uppercase tracking-tight">
         <span class="site-title-highlight-wrap">практика</span><span class="site-title-rest">студентам.рф</span>
@@ -14,7 +14,6 @@
           <span>отправить письмо</span>
         </a>
       </div>
-      <Divider />
     </div>
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -38,7 +37,6 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useThemeStore } from '../stores/theme'
-import Divider from './Divider.vue'
 
 const route = useRoute()
 const themeStore = useThemeStore()
@@ -51,6 +49,10 @@ const isCompanyPage = computed(() => {
 </script>
 
 <style scoped>
+.footer-top-border {
+  border-top: 4px solid #000;
+}
+
 .site-title {
   margin-bottom: 0.5rem;
   line-height: 1.15;
