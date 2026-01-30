@@ -1,25 +1,25 @@
 <template>
   <footer class="mt-auto" :class="{ 'footer-top-border': !isCompanyPage }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <p v-if="!isCompanyPage" class="site-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold pt-6 sm:pt-8 pb-4 sm:pb-6 lg:pb-8 w-full text-[#000000] dark:text-white uppercase tracking-tight">
-        <span class="site-title-highlight-wrap">практика</span><span class="site-title-rest">студентам.рф</span>
-      </p>
-      <div v-if="!isCompanyPage" class="flex flex-col sm:flex-row gap-4 py-4">
-        <a href="https://t.me/schierketsu" target="_blank" rel="noopener noreferrer" class="flex-1 px-4 py-2 sm:px-6 sm:py-3 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-white text-gray-700 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base">
-          <img :src="isDark ? '/icontelegramdark.png' : '/icontelegram.png'" alt="Telegram" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
-          <span>моя телега</span>
-        </a>
-        <a href="mailto:crumplemi@yandex.ru" class="flex-1 px-4 py-2 sm:px-6 sm:py-3 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-white text-gray-700 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base">
-          <img :src="isDark ? '/iconemaildark.png' : '/iconemail.png'" alt="Email" class="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
-          <span>отправить письмо</span>
-        </a>
+      <div v-if="!isCompanyPage" class="flex flex-row flex-wrap items-center justify-between gap-4 pt-6 sm:pt-8 pb-4 sm:pb-6 lg:pb-8">
+        <p class="site-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#000000] dark:text-white uppercase tracking-tight">
+          <span class="site-title-highlight-wrap">практика</span><span class="site-title-rest">студентам.рф</span>
+        </p>
+        <div class="flex flex-row gap-9">
+          <a href="https://t.me/schierketsu" target="_blank" rel="noopener noreferrer" class="footer-icon-btn inline-flex items-center justify-center flex-shrink-0 rounded-none transition-colors" title="моя телега">
+            <img :src="isDark ? '/icontelegramdark.png' : '/icontelegram.png'" alt="Telegram" class="footer-icon-btn-img object-contain" />
+          </a>
+          <a href="mailto:crumplemi@yandex.ru" class="footer-icon-btn inline-flex items-center justify-center flex-shrink-0 rounded-none transition-colors" title="отправить письмо">
+            <img :src="isDark ? '/iconemaildark.png' : '/iconemail.png'" alt="Email" class="footer-icon-btn-img object-contain" />
+          </a>
+        </div>
       </div>
     </div>
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div class="flex flex-col gap-1">
           <p class="text-sm text-gray-600 dark:text-white">
-            сделано с любовью к хорошим практикам <span v-if="!isDark">💚</span><span v-else>💙</span>
+            сделано с любовью к хорошим практикам
           </p>
           <p class="text-sm text-gray-600 dark:text-white">©2025</p>
         </div>
@@ -54,15 +54,11 @@ const isCompanyPage = computed(() => {
 }
 
 .site-title {
-  margin-bottom: 0.5rem;
+  margin: 0;
   line-height: 1.15;
   letter-spacing: 0.02em;
-}
-
-@media (min-width: 1024px) {
-  .site-title {
-    margin-bottom: 1rem;
-  }
+  display: flex;
+  align-items: center;
 }
 
 /* Первая часть — прямоугольный зелёный блок, как «О СЕБЕ» на референсе */
@@ -77,6 +73,61 @@ const isCompanyPage = computed(() => {
 
 .site-title-rest {
   display: inline;
+}
+
+/* Квадратные кнопки-иконки: как активная кнопка «стажировки» по умолчанию */
+.footer-icon-btn {
+  width: 3.09rem;   /* 1.65 × 1.875rem (text-3xl) */
+  height: 3.09rem;
+  background-color: #82CAFF;
+  color: #000;
+  border: 2px solid #000;
+  box-shadow: 5px 5px 0 0 #000;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.footer-icon-btn:hover {
+  background-color: #6bb8f0;
+  box-shadow: 0 0 0 0 #000;
+  transform: translate(5px, 5px);
+}
+
+.footer-icon-btn-img {
+  width: 1.55rem;
+  height: 1.55rem;
+}
+
+@media (min-width: 640px) {
+  .footer-icon-btn {
+    width: 3.71rem;  /* 1.65 × 2.25rem (text-4xl) */
+    height: 3.71rem;
+  }
+  .footer-icon-btn-img {
+    width: 1.85rem;
+    height: 1.85rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .footer-icon-btn {
+    width: 4.95rem;  /* 1.65 × 3rem (text-5xl) */
+    height: 4.95rem;
+  }
+  .footer-icon-btn-img {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer-icon-btn {
+    width: 6.19rem;  /* 1.65 × 3.75rem (text-6xl) */
+    height: 6.19rem;
+  }
+  .footer-icon-btn-img {
+    width: 3.1rem;
+    height: 3.1rem;
+  }
 }
 </style>
 

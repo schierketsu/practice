@@ -24,10 +24,8 @@
       <div class="pt-4 pr-4 pb-0 sm:pt-5 sm:pr-6 sm:pb-0 lg:pt-7 lg:pr-8 lg:pb-0 pl-[calc(36px+80px+12px)] sm:pl-[calc(48px+144px+24px)]">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between min-h-20 sm:min-h-36 mb-2 sm:mb-3">
           <div class="flex flex-col justify-start">
-            <h1 class="text-xl sm:text-3xl lg:text-4xl font-extrabold mb-1 leading-tight text-[#000000] dark:text-white" style="font-variant: small-caps;">{{ company.name }}</h1>
-            <p class="text-sm sm:text-lg lg:text-xl text-gray-600 dark:text-white leading-tight">
-              {{ company.sector }}
-            </p>
+            <h1 class="about-company-heading company-name-heading">{{ company.name }}</h1>
+            <p class="company-sector">{{ company.sector }}</p>
           </div>
           <!-- Технологии для десктопа - правый верхний угол -->
           <div class="hidden lg:flex lg:flex-wrap lg:gap-2.5 lg:max-w-md lg:justify-end mt-0">
@@ -54,7 +52,7 @@
       <!-- Секция "О КОМПАНИИ" -->
       <div class="-mt-2 sm:-mt-3 lg:-mt-4 pt-0 pr-4 pb-4 sm:pt-1 sm:pr-6 sm:pb-6 lg:pt-2 lg:pr-8 lg:pb-8 pl-4 sm:pl-6 lg:pl-8 flex flex-col gap-4 sm:gap-6">
         <div class="w-full">
-          <h2 class="text-xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 sm:mb-3" style="font-variant: small-caps;">О КОМПАНИИ</h2>
+          <h2 class="about-company-heading">О КОМПАНИИ</h2>
           <p class="text-sm sm:text-base text-gray-700 dark:text-white leading-relaxed">{{ company.description }}</p>
         </div>
         <!-- Технологии для мобильной версии - остаются на месте -->
@@ -149,7 +147,7 @@
       <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
       <div class="reviews-layer rounded-lg overflow-hidden">
       <div class="pt-4 pr-4 pb-4 sm:pt-6 sm:pr-6 sm:pb-6 lg:pt-8 lg:pr-8 lg:pb-8 pl-4 sm:pl-6 lg:pl-8">
-        <h2 class="text-xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-4 sm:mb-6" style="font-variant: small-caps;">ОТКЛИКИ</h2>
+        <h2 class="about-company-heading">ОТКЛИКИ</h2>
         <div class="space-y-4 sm:space-y-6">
           <div
             v-for="(review, index) in reviews"
@@ -395,6 +393,62 @@ function handleTechImageError(event) {
 </script>
 
 <style scoped>
+.about-company-heading {
+  font-family: 'Space Grotesk', sans-serif;
+  color: rgb(10 10 10);
+  margin: 0 0 1.5rem 0;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.company-name-heading {
+  font-size: 2.5rem;
+  line-height: 3rem;
+  margin-bottom: -0.125rem;
+}
+
+@media (min-width: 640px) {
+  .company-name-heading {
+    font-size: 3rem;
+    line-height: 3.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .company-name-heading {
+    font-size: 3.75rem;
+    line-height: 4rem;
+  }
+}
+
+.company-sector {
+  font-family: 'Space Grotesk', sans-serif;
+  color: rgb(10 10 10);
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.375rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 640px) {
+  .company-sector {
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .company-sector {
+    font-size: 1.25rem;
+    line-height: 1.625rem;
+  }
+}
+
 /* Область откликов на всю ширину, как слой с фильтрами и картой */
 .reviews-dots-wrap {
   background-color: #fafaf8;
