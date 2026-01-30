@@ -1,13 +1,13 @@
 <template>
-  <div class="bg-white dark:bg-[#1a1a1a] p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 dark:border-0 relative" style="border-top-color: #7A3FFF; border-top-width: 6px;">
+  <div class="bg-white dark:bg-[#1a1a1a] p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 dark:border-0 relative" style="border-top-color: #1D4ED8; border-top-width: 6px;">
     <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2 pr-10 sm:pr-12">
       <h3 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-[#000000] dark:text-white leading-tight">
-        <span style="color: #7A3FFF">{</span> <span class="hidden sm:inline">фильтр по технологиям</span><span class="sm:hidden">фильтр</span> <span style="color: #7A3FFF">}</span>
+        <span style="color: #1D4ED8">{</span> <span class="hidden sm:inline">фильтр по технологиям</span><span class="sm:hidden">фильтр</span> <span style="color: #1D4ED8">}</span>
       </h3>
       <button
         @click="clearFilters"
         :disabled="selectedTechnologies.length === 0"
-        class="px-2 py-1.5 sm:px-4 sm:py-2 bg-[#7A3FFF] hover:bg-[#6a2fef] transition-colors font-medium text-xs sm:text-base flex items-center justify-center absolute top-0 right-0 rounded-bl-lg"
+        class="px-2 py-1.5 sm:px-4 sm:py-2 bg-[#1D4ED8] hover:bg-[#164bc2] transition-colors font-medium text-xs sm:text-base flex items-center justify-center absolute top-0 right-0 rounded-bl-lg"
         :style="selectedTechnologies.length === 0 ? 'visibility: hidden' : ''"
       >
         <img
@@ -50,7 +50,7 @@
                   ? 'text-white'
                   : ''
               ]"
-              :style="selectedTechnologies.includes(tech) ? 'background-color: #7A3FFF' : 'background-color: #F3F4F6; color: #000000'"
+              :style="selectedTechnologies.includes(tech) ? 'background-color: #1D4ED8' : 'background-color: #F3F4F6; color: #000000'"
             >
               {{ tech }}
             </button>
@@ -172,7 +172,7 @@ function getTechStyle(tech) {
   if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
     return 'background-color: #A8E4A0; color: #000000'
   }
-  return 'background-color: #7A3FFF; color: #ffffff'
+  return 'background-color: #1D4ED8; color: #ffffff'
 }
 </script>
 

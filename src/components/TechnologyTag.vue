@@ -35,7 +35,7 @@ function getTechStyle() {
     return 'background-color: #A8E4A0; color: #000000'
   }
   
-  return 'background-color: #7A3FFF; color: #ffffff'
+  return 'background-color: #1D4ED8; color: #ffffff'
 }
 </script>
 

@@ -11,23 +11,26 @@
               <img v-if="!themeStore.isDark" src="/light.png" alt="Light" class="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
               <img v-else src="/dark.png" alt="Dark" class="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
             </button>
-            <button class="px-2 py-1.5 sm:px-6 sm:py-3 rounded-lg font-semibold text-xs sm:text-base bg-[#A8E4A0] text-[#000000] hover:bg-[#A8E4A0] transition-colors whitespace-nowrap">
+            <router-link
+              to="/"
+              class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base inline-block no-underline whitespace-nowrap"
+            >
               <span class="hidden sm:inline">мой профиль</span>
               <span class="sm:hidden">профиль</span>
-            </button>
+            </router-link>
           </div>
           <div class="flex items-center gap-2 sm:gap-3">
             <router-link
               v-if="$route.path !== '/стажировки'"
               to="/стажировки"
-              class="px-2 py-1.5 sm:px-6 sm:py-3 rounded-lg font-semibold text-xs sm:text-base bg-[#A8E4A0] text-[#000000] hover:bg-[#A8E4A0] transition-colors inline-block no-underline whitespace-nowrap"
+              class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base inline-block no-underline whitespace-nowrap"
             >
               стажировки
             </router-link>
             <router-link
               v-else
               to="/практики"
-              class="px-2 py-1.5 sm:px-6 sm:py-3 rounded-lg font-semibold text-xs sm:text-base bg-[#A8E4A0] text-[#000000] hover:bg-[#A8E4A0] transition-colors inline-block no-underline whitespace-nowrap"
+              class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base inline-block no-underline whitespace-nowrap"
             >
               практики
             </router-link>
@@ -49,4 +52,22 @@ import Footer from './components/Footer.vue'
 
 const themeStore = useThemeStore()
 </script>
+
+<style scoped>
+/* Неактивное: чёрный фон, белый текст. Активное (hover): голубой фон #82CAFF, чёрный текст, полная чёрная рамка, тень 3D. */
+.header-btn {
+  background-color: #000;
+  color: #fff;
+  border: 2px solid transparent;
+  box-shadow: none;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.header-btn:hover {
+  background-color: #82CAFF;
+  color: #000;
+  border: 2px solid #000;
+  box-shadow: 5px 5px 0 0 #000;
+}
+</style>
 

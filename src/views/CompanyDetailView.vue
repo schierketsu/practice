@@ -3,10 +3,10 @@
     <div v-if="company" class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden relative">
       <button
         @click="$router.push('/практики')"
-        class="absolute top-0 left-[-1px] w-[36px] sm:w-[48px] h-20 sm:h-36 pl-2 pr-2 sm:pl-3 sm:pr-3 bg-[#A8E4A0] text-[#000000] border-none rounded-tl-lg font-bold cursor-pointer transition-colors flex items-center justify-center z-10 m-0 hover:bg-[#A8E4A0]"
+        class="absolute top-0 left-[-1px] w-[36px] sm:w-[48px] h-20 sm:h-36 pl-2 pr-2 sm:pl-3 sm:pr-3 bg-[#1D4ED8] text-white border-4 border-black rounded-tl-lg font-bold cursor-pointer transition-colors flex items-center justify-center z-10 m-0 hover:bg-[#164bc2]"
         style="border-radius: 12px 0 0 0;"
       >
-        <img src="/arrowleft.png" alt="←" class="w-auto h-auto max-w-[20px] max-h-[20px] sm:max-w-[24px] sm:max-h-[24px] block" />
+        <img src="/arrowleft2.png" alt="←" class="w-auto h-auto max-w-[20px] max-h-[20px] sm:max-w-[24px] sm:max-h-[24px] block" />
       </button>
       <div class="absolute top-0 left-[35px] sm:left-[47px] w-20 h-20 sm:w-36 sm:h-36 rounded-r-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0 z-10">
         <img
@@ -136,7 +136,7 @@
       
       <!-- Кнопка подачи заявки -->
       <button
-        class="w-full py-2.5 sm:py-3 bg-[#A8E4A0] text-[#000000] rounded-none hover:bg-[#A8E4A0] transition-colors font-semibold text-sm sm:text-base lg:text-lg"
+        class="w-full py-2.5 sm:py-3 bg-[#1D4ED8] text-white rounded-none border-4 border-black hover:bg-[#164bc2] transition-colors font-semibold text-sm sm:text-base lg:text-lg"
       >
         подать заявку на практику
       </button>

@@ -41,10 +41,10 @@ function getTechStyle(tech, isSelected) {
     return 'background-color: #A8E4A0; color: #000000'
   }
   
-  return 'background-color: #7A3FFF; color: #ffffff'
+  return 'background-color: #1D4ED8; color: #ffffff'
 }
 
-function createCustomMarkerIcon(color = '#7A3FFF') {
+function createCustomMarkerIcon(color = '#1D4ED8') {
   // Создаем классический маркер-булавку фиолетового цвета (широкий)
   const svg = `<svg width="30" height="41" viewBox="0 0 30 41" xmlns="http://www.w3.org/2000/svg">
     <path d="M15 0 C22.2 0, 30 6.8, 30 15 C30 24, 15 41, 15 41 C15 41, 0 24, 0 15 C0 6.8, 7.8 0, 15 0 Z" 
@@ -86,7 +86,7 @@ function createPopupContent(company) {
     : ''
   
   return `
-    <div style="min-width: 280px; max-width: 320px; font-family: Inter, system-ui, -apple-system, sans-serif; background-color: ${bgColor}; border-radius: 12px; overflow: hidden; position: relative;">
+    <div style="min-width: 280px; max-width: 320px; font-family: 'Inter', sans-serif; background-color: ${bgColor}; border-radius: 12px; overflow: hidden; position: relative;">
       <div style="padding: 16px; padding-right: 60px;">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
           <div style="width: 48px; height: 48px; border-radius: 8px; border: 1px solid ${borderColor}; background-color: ${isDark.value ? '#2a2a2a' : '#f3f4f6'}; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative;">
@@ -112,11 +112,11 @@ function createPopupContent(company) {
       </div>
       <button 
         onclick="window.location.href='/компания/${company.id}'"
-        style="position: absolute; top: 0; right: -1px; bottom: 0; width: 49px; padding-left: 12px; padding-right: 12px; background-color: #A8E4A0; color: #000000; border: none; border-radius: 0 12px 12px 0; font-weight: 700; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; z-index: 10; margin: 0;"
-        onmouseover="this.style.backgroundColor='#A8E4A0'"
-        onmouseout="this.style.backgroundColor='#A8E4A0'"
+        style="position: absolute; top: 0; right: -1px; bottom: 0; width: 49px; padding-left: 12px; padding-right: 12px; background-color: #1D4ED8; color: #ffffff; border: none; border-radius: 0 12px 12px 0; font-weight: 700; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; z-index: 10; margin: 0;"
+        onmouseover="this.style.backgroundColor='#164bc2'"
+        onmouseout="this.style.backgroundColor='#1D4ED8'"
       >
-        <img src="/arrowright.png" alt="→" style="width: auto; height: auto; max-width: 24px; max-height: 24px; display: block;" />
+        <img src="/arrowright2.png" alt="→" style="width: auto; height: auto; max-width: 24px; max-height: 24px; display: block;" />
       </button>
     </div>
   `
@@ -218,7 +218,7 @@ function updateMarkers() {
     filteredCompanies.value.forEach((company) => {
       if (company.coordinates && company.coordinates.lat && company.coordinates.lng) {
         // Все маркеры фиолетовые
-        const markerColor = '#7A3FFF'
+        const markerColor = '#1D4ED8'
         const marker = L.marker([company.coordinates.lat, company.coordinates.lng], {
           icon: createCustomMarkerIcon(markerColor)
         })
