@@ -218,12 +218,10 @@ watch(() => company.value?.id, () => {
   currentImageIndex.value = 0
 })
 
-// Фотографии для карусели
+// Фотографии для карусели — по умолчанию 3 слайда с back3.png
 const companyImages = computed(() => {
   if (!company.value) return []
-  
-  // По умолчанию 3 изображения placeholder для всех компаний
-  return ['/placeholder.jpg', '/placeholder.jpg', '/placeholder.jpg']
+  return ['/back31.png', '/back31.png', '/back31.png']
 })
 
 function nextImage() {
