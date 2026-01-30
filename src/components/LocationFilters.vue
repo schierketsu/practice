@@ -1,12 +1,12 @@
 <template>
   <div class="bg-white dark:bg-[#1a1a1a] p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 dark:border-0 relative" style="border-top-color: #1D4ED8; border-top-width: 6px;">
     <div class="flex items-center justify-between mb-3 sm:mb-4 gap-2 pr-10 sm:pr-12">
-      <h3 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-[#000000] dark:text-white leading-tight">
+      <h3 class="filter-placeholder-heading">
         <span class="hidden sm:inline-block">
-          <span style="color: #1D4ED8">{</span> ваше<br>место учёбы <span style="color: #1D4ED8">}</span>
+          <span class="filter-placeholder-brace">{</span> выберите<br>место учебы <span class="filter-placeholder-brace">}</span>
         </span>
         <span class="sm:hidden">
-          <span style="color: #1D4ED8">{</span> ваше место учебы <span style="color: #1D4ED8">}</span>
+          <span class="filter-placeholder-brace">{</span> выберите место учебы <span class="filter-placeholder-brace">}</span>
         </span>
       </h3>
       <button
@@ -252,3 +252,20 @@ function toLowerCaseFirst(str) {
   return str.charAt(0).toLowerCase() + str.slice(1)
 }
 </script>
+
+<style scoped>
+.filter-placeholder-heading {
+  font-family: 'Space Grotesk', sans-serif;
+  color: rgb(10 10 10);
+  margin: 0;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.filter-placeholder-brace {
+  color: #164BC1;
+}
+</style>

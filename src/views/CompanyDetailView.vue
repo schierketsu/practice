@@ -173,11 +173,9 @@
               {{ review.text }}
             </p>
             <div class="flex flex-wrap items-center gap-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
-              <span class="flex items-center gap-1 text-sm sm:text-base">
+              <span class="review-rating-block flex items-center gap-1.5 text-sm sm:text-base font-semibold">
                 {{ review.rating }}
-                <svg class="w-[1em] h-[1em]" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#fbd16a"/>
-                </svg>
+                <img src="/сердце3д.png" alt="" class="review-heart-icon w-4 h-4 sm:w-5 sm:h-5 object-contain" />
               </span>
               <span>{{ review.employment }}</span>
               <span>{{ review.location }}</span>

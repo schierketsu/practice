@@ -2,7 +2,7 @@
   <footer class="mt-auto" :class="{ 'footer-top-border': !isCompanyPage }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div v-if="!isCompanyPage" class="flex flex-row flex-wrap items-center justify-between gap-4 pt-6 sm:pt-8 pb-4 sm:pb-6 lg:pb-8">
-        <p class="site-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#000000] dark:text-white uppercase tracking-tight">
+        <p class="site-title">
           <span class="site-title-highlight-wrap">практика</span><span class="site-title-rest">студентам.рф</span>
         </p>
         <div class="flex flex-row gap-9">
@@ -54,11 +54,30 @@ const isCompanyPage = computed(() => {
 }
 
 .site-title {
+  font-family: 'Space Grotesk', sans-serif;
+  color: rgb(10 10 10);
   margin: 0;
-  line-height: 1.15;
-  letter-spacing: 0.02em;
+  font-size: 2.5rem;
+  line-height: 3rem;
+  font-weight: 900;
+  text-transform: uppercase;
   display: flex;
   align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 640px) {
+  .site-title {
+    font-size: 2.75rem;
+    line-height: 3.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .site-title {
+    font-size: 3.5rem;
+    line-height: 4rem;
+  }
 }
 
 /* Первая часть — прямоугольный зелёный блок, как «О СЕБЕ» на референсе */
