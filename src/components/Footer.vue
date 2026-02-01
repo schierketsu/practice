@@ -1,30 +1,27 @@
 <template>
-  <footer class="mt-auto" :class="{ 'footer-top-border': !isCompanyPage }">
+  <footer class="mt-auto bg-black text-white" :class="{ 'footer-top-border': !isCompanyPage }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div v-if="!isCompanyPage" class="flex flex-row flex-wrap items-center justify-between gap-4 pt-6 sm:pt-8 pb-4 sm:pb-6 lg:pb-8">
+      <div v-if="!isCompanyPage" class="flex flex-row flex-wrap items-center justify-between gap-4 pt-6 sm:pt-8 pb-1 sm:pb-2">
         <p class="site-title">
           <span class="site-title-highlight-wrap">практика</span><span class="site-title-rest">студентам.рф</span>
         </p>
-        <div class="flex flex-row gap-9">
-          <a href="https://t.me/schierketsu" target="_blank" rel="noopener noreferrer" class="footer-icon-btn inline-flex items-center justify-center flex-shrink-0 rounded-none transition-colors" title="моя телега">
-            <img :src="isDark ? '/icontelegramdark.png' : '/icontelegram.png'" alt="Telegram" class="footer-icon-btn-img object-contain" />
-          </a>
-          <a href="mailto:crumplemi@yandex.ru" class="footer-icon-btn inline-flex items-center justify-center flex-shrink-0 rounded-none transition-colors" title="отправить письмо">
+        <div class="flex flex-row gap-3 items-center">
+          <a href="mailto:crumplemi@yandex.ru" class="footer-icon-btn footer-icon-btn-email inline-flex items-center justify-center flex-shrink-0 rounded-none transition-colors" title="отправить письмо">
             <img :src="isDark ? '/iconemaildark.png' : '/iconemail.png'" alt="Email" class="footer-icon-btn-img object-contain" />
           </a>
         </div>
       </div>
     </div>
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-4 sm:pb-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div class="flex flex-col gap-1">
-          <p class="text-sm text-gray-600 dark:text-white">
+          <p class="text-sm text-white">
             сделано с любовью к хорошим практикам
           </p>
-          <p class="text-sm text-gray-600 dark:text-white">©2025</p>
+          <p class="text-sm text-white">©2025</p>
         </div>
         <div class="flex flex-col gap-1 items-start sm:items-end">
-          <a href="#" class="text-sm text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white underline">
+          <a href="#" class="text-sm text-white hover:text-gray-200 underline">
             очень важная ссылка
           </a>
         </div>
@@ -42,20 +39,18 @@ const route = useRoute()
 const themeStore = useThemeStore()
 const isDark = computed(() => themeStore.isDark)
 
-// Проверяем, находимся ли мы на странице детальной информации о компании
-const isCompanyPage = computed(() => {
-  return route.path.startsWith('/компания/')
-})
+// По именам маршрутов — надёжнее, чем сравнение path (редиректы, кодировка)
+const isCompanyPage = computed(() => route.name === 'company-detail')
 </script>
 
 <style scoped>
 .footer-top-border {
-  border-top: 4px solid #000;
+  border-top: 4px solid #fff;
 }
 
 .site-title {
   font-family: 'Space Grotesk', sans-serif;
-  color: rgb(10 10 10);
+  color: #fff;
   margin: 0;
   font-size: 2.5rem;
   line-height: 3rem;
@@ -80,13 +75,27 @@ const isCompanyPage = computed(() => {
   }
 }
 
-/* Первая часть — прямоугольный зелёный блок, как «О СЕБЕ» на референсе */
+/* Синий фон под «практика» — обрезан по контуру буквы «А» */
 .site-title-highlight-wrap {
   display: inline-block;
-  background-color: #7AFC50;
-  color: #000;
-  padding: 0.25em 0.2em 0.25em 0.6em;
-  margin-right: 0;
+  position: relative;
+  z-index: 0;
+  color: #fff;
+  padding: 0.25em 0 0.25em 0.6em;
+  margin-right: 0.1em;
+  border-radius: 0;
+  letter-spacing: 0.25em;
+}
+
+.site-title-highlight-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0.25em;
+  background-color: #82CAFF;
+  z-index: -1;
   border-radius: 0;
 }
 
@@ -108,6 +117,24 @@ const isCompanyPage = computed(() => {
 .footer-icon-btn:hover {
   background-color: #6bb8f0;
   box-shadow: 0 0 0 0 #000;
+  transform: translate(5px, 5px);
+}
+
+.footer-icon-btn-email {
+  background-color: #fff;
+  box-shadow: 5px 5px 0 0 #6b7280;
+  width: 92px;
+  height: 92px;
+}
+
+.footer-icon-btn-email .footer-icon-btn-img {
+  width: 2.875rem;
+  height: 2.875rem;
+}
+
+.footer-icon-btn-email:hover {
+  background-color: #f0f0f0;
+  box-shadow: 0 0 0 0 #6b7280;
   transform: translate(5px, 5px);
 }
 
@@ -140,12 +167,12 @@ const isCompanyPage = computed(() => {
 
 @media (min-width: 1024px) {
   .footer-icon-btn {
-    width: 6.19rem;  /* 1.65 × 3.75rem (text-6xl) */
-    height: 6.19rem;
+    width: 92px;
+    height: 92px;
   }
   .footer-icon-btn-img {
-    width: 3.1rem;
-    height: 3.1rem;
+    width: 2.875rem;
+    height: 2.875rem;
   }
 }
 </style>

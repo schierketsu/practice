@@ -34,13 +34,20 @@
     <main class="flex-1">
       <RouterView />
     </main>
+    <div v-if="isHomePage" class="content-footer-layer w-full min-h-[8rem] sm:min-h-[10rem] lg:min-h-[12rem] bg-white flex items-center justify-center">
+      <p class="text-gray-500 text-base sm:text-lg">скоро появится</p>
+    </div>
     <Footer />
   </div>
 </template>
 
 <script setup>
-import { RouterView } from 'vue-router'
+import { computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
 import Footer from './components/Footer.vue'
+
+const route = useRoute()
+const isHomePage = computed(() => route.name === 'home')
 </script>
 
 <style scoped>

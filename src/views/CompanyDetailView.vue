@@ -2,14 +2,7 @@
   <div class="py-4 sm:py-8">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
     <div v-if="company" class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden relative">
-      <button
-        @click="$router.push('/практики')"
-        class="absolute top-0 left-[-1px] w-[36px] sm:w-[48px] h-20 sm:h-36 pl-2 pr-2 sm:pl-3 sm:pr-3 bg-[#1D4ED8] text-white border-4 border-black rounded-tl-lg font-bold cursor-pointer transition-colors flex items-center justify-center z-10 m-0 hover:bg-[#164bc2]"
-        style="border-radius: 12px 0 0 0;"
-      >
-        <img src="/arrowleft2.png" alt="←" class="w-auto h-auto max-w-[20px] max-h-[20px] sm:max-w-[24px] sm:max-h-[24px] block" />
-      </button>
-      <div class="absolute top-0 left-[35px] sm:left-[47px] w-20 h-20 sm:w-36 sm:h-36 rounded-r-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0 z-10">
+      <div class="absolute top-0 left-0 w-24 h-24 sm:w-40 sm:h-40 rounded-r-lg rounded-br-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0 z-10">
         <img
           :src="company.logo"
           :alt="company.name"
@@ -21,7 +14,7 @@
           {{ getPlaceholderText(company.name) }}
         </div>
       </div>
-      <div class="pt-4 pr-4 pb-0 sm:pt-5 sm:pr-6 sm:pb-0 lg:pt-7 lg:pr-8 lg:pb-0 pl-[calc(36px+80px+12px)] sm:pl-[calc(48px+144px+24px)]">
+      <div class="pt-4 pr-4 pb-0 sm:pt-5 sm:pr-6 sm:pb-0 lg:pt-7 lg:pr-8 lg:pb-0 pl-[calc(96px+12px)] sm:pl-[calc(160px+24px)]">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between min-h-20 sm:min-h-36 mb-2 sm:mb-3">
           <div class="flex flex-col justify-start">
             <h1 class="about-company-heading company-name-heading">{{ company.name }}</h1>
@@ -52,7 +45,7 @@
       <!-- Секция "О КОМПАНИИ" -->
       <div class="-mt-2 sm:-mt-3 lg:-mt-4 pt-0 pr-4 pb-4 sm:pt-1 sm:pr-6 sm:pb-6 lg:pt-2 lg:pr-8 lg:pb-8 pl-4 sm:pl-6 lg:pl-8 flex flex-col gap-4 sm:gap-6">
         <div class="w-full">
-          <h2 class="about-company-heading">О КОМПАНИИ</h2>
+          <h2 class="about-company-heading about-company-label"><span>О КОМПАНИИ</span></h2>
           <p class="text-sm sm:text-base text-gray-700 dark:text-white leading-relaxed">{{ company.description }}</p>
         </div>
         <!-- Технологии для мобильной версии - остаются на месте -->
@@ -400,6 +393,20 @@ function handleTechImageError(event) {
   font-weight: 900;
   text-transform: uppercase;
   -webkit-tap-highlight-color: transparent;
+}
+
+.about-company-label {
+  color: #fff;
+  background-color: #164BC2;
+  padding: 0.25em 0.5em;
+  display: inline-block;
+  transform: skewX(-8deg);
+  
+}
+
+.about-company-label span {
+  display: inline-block;
+  transform: skewX(8deg);
 }
 
 .company-name-heading {

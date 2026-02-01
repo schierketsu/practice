@@ -189,7 +189,7 @@ function getTechStyle(tech) {
 }
 
 .filter-placeholder-brace {
-  color: #164BC1;
+  color: rgba(22, 75, 193, 1);
 }
 </style>
 
