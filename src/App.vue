@@ -51,7 +51,7 @@ const isHomePage = computed(() => route.name === 'home')
 </script>
 
 <style scoped>
-/* Неактивное: чёрный фон, белый текст. Активное (hover): голубой фон #82CAFF, чёрный текст, полная чёрная рамка, тень 3D. */
+/* Неактивное: чёрный фон, белый текст. Активное (hover): голубой фон #85CBFA, чёрный текст, полная чёрная рамка, тень 3D. */
 .header-btn {
   background-color: #000;
   color: #fff;
@@ -61,7 +61,7 @@ const isHomePage = computed(() => route.name === 'home')
 }
 
 .header-btn:hover {
-  background-color: #82CAFF;
+  background-color: #85CBFA;
   color: #000;
   border: 2px solid #000;
   box-shadow: 5px 5px 0 0 #000;

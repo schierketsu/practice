@@ -94,7 +94,7 @@ const isDark = computed(() => themeStore.isDark)
   bottom: 0;
   left: 0;
   right: 0.25em;
-  background-color: #82CAFF;
+  background-color: #85CBFA !important;
   z-index: -1;
   border-radius: 0;
 }
