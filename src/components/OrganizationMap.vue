@@ -244,6 +244,16 @@ onUnmounted(() => {
   display: none !important;
 }
 
+/* Скрываем кнопку «reset bearing to north» (компас) */
+:deep(.maplibregl-ctrl-compass),
+:deep(.maptiler-ctrl-compass),
+:deep(button[title*="bearing"]),
+:deep(button[title*="North"]),
+:deep(button[aria-label*="bearing"]),
+:deep(button[aria-label*="North"]) {
+  display: none !important;
+}
+
 :deep(.maplibregl-popup-content),
 :deep(.maptiler-popup-content) {
   padding: 0;
