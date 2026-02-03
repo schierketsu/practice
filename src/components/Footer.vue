@@ -84,7 +84,7 @@ const isDark = computed(() => themeStore.isDark)
   padding: 0.25em 0 0.25em 0.6em;
   margin-right: 0.1em;
   border-radius: 0;
-  letter-spacing: 0.25em;
+  letter-spacing: normal;
 }
 
 .site-title-highlight-wrap::before {
@@ -93,7 +93,7 @@ const isDark = computed(() => themeStore.isDark)
   top: 0;
   bottom: 0;
   left: 0;
-  right: 0.25em;
+  right: 0;
   background-color: #85CBFA !important;
   z-index: -1;
   border-radius: 0;
