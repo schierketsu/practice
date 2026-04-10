@@ -7,7 +7,9 @@
         </div>
         <div v-else class="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-6">
           <!-- Фильтры слева (~40% на десктопе; контейнер max-w-screen-2xl шире max-w-7xl) -->
-          <div class="filters-column w-full lg:w-2/5 flex-shrink-0 overflow-y-auto flex flex-col gap-4">
+          <div
+            class="filters-column relative z-[60] flex w-full flex-shrink-0 flex-col gap-4 overflow-visible lg:z-auto lg:w-2/5 lg:overflow-y-auto"
+          >
             <LocationFilters />
 
             <!-- Фильтр по технологиям - показывается только для Чебоксары, ЧУВГУ ИМ. И. Н. УЛЬЯНОВА, факультет ИВТ -->
@@ -15,7 +17,9 @@
           </div>
 
           <!-- Карта справа (2/3 ширины на десктопе, фиксированная высота на мобильных) -->
-          <div class="map-column w-full lg:flex-1 flex-shrink-0 h-[calc(100vh-380px)] sm:h-[calc(100vh-360px)] lg:h-[calc(100vh-200px)] min-h-[400px] sm:min-h-[450px] lg:min-h-[500px] max-h-[calc(100vh-380px)] sm:max-h-[calc(100vh-360px)] lg:max-h-none overflow-hidden relative">
+          <div
+            class="map-column relative z-0 min-h-[280px] w-full min-w-0 flex-shrink-0 overflow-hidden h-[min(52vh,520px)] max-h-[min(70vh,640px)] sm:min-h-[400px] sm:h-[calc(100vh-300px)] sm:max-h-[calc(100vh-280px)] lg:min-h-[500px] lg:h-[calc(100vh-200px)] lg:max-h-none lg:flex-1"
+          >
             <OrganizationMap />
 
             <!-- Модальное окно "Организации не найдены" поверх карты -->
@@ -105,6 +109,7 @@ function closeModal() {
 
 function clearFiltersAndClose() {
   store.setTechnologiesFilter([])
+  store.dismissMobileMapCompanyCard()
   closeModal()
 }
 </script>

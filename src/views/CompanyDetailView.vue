@@ -20,7 +20,7 @@
       <div class="pt-4 pr-4 pb-0 sm:pt-5 sm:pr-6 sm:pb-0 lg:pt-7 lg:pr-8 lg:pb-0 pl-[calc(96px+12px)] sm:pl-[calc(160px+24px)]">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between min-h-20 sm:min-h-36 mb-2 sm:mb-3">
           <div class="flex flex-col justify-start">
-            <h1 class="about-company-heading company-name-heading">{{ company.name }}</h1>
+            <h1 class="about-company-heading company-name-heading break-words hyphens-auto">{{ company.name }}</h1>
             <p class="company-sector">{{ company.sector }}</p>
           </div>
           <!-- Технологии для десктопа - правый верхний угол -->
@@ -45,8 +45,10 @@
 
       </div>
       
-      <!-- Секция "О КОМПАНИИ" -->
-      <div class="-mt-2 sm:-mt-3 lg:-mt-4 pt-0 pr-4 pb-4 sm:pt-1 sm:pr-6 sm:pb-6 lg:pt-2 lg:pr-8 lg:pb-8 pl-4 sm:pl-6 lg:pl-8 flex flex-col gap-4 sm:gap-6">
+      <!-- Секция "О КОМПАНИИ" — чуть ниже аватарки, без лишнего отступа влево -->
+      <div
+        class="mt-5 pt-0 pr-4 pb-4 sm:-mt-3 sm:pt-1 sm:pr-6 sm:pb-6 lg:-mt-4 lg:pt-2 lg:pr-8 lg:pb-8 pl-4 sm:pl-6 lg:pl-8 flex flex-col gap-4 sm:gap-6"
+      >
         <div class="w-full">
           <h2 class="about-company-heading about-company-label"><span>О КОМПАНИИ</span></h2>
           <p class="text-sm sm:text-base text-gray-700 dark:text-white leading-relaxed">{{ company.description }}</p>
@@ -559,11 +561,18 @@ function handleTechImageError(event) {
   font-family: 'Polonium', serif;
   color: rgb(33 33 33);
   margin: 0 0 1.5rem 0;
-  font-size: 1.875rem;
-  line-height: 2.25rem;
+  font-size: 1.25rem;
+  line-height: 1.3;
   font-weight: 900;
   text-transform: uppercase;
   -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 640px) {
+  .about-company-heading {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
 }
 
 .about-company-label {
@@ -581,15 +590,15 @@ function handleTechImageError(event) {
 }
 
 .company-name-heading {
-  font-size: 2.5rem;
-  line-height: 3rem;
+  font-size: 1.375rem;
+  line-height: 1.25;
   margin-bottom: -0.125rem;
 }
 
 @media (min-width: 640px) {
   .company-name-heading {
-    font-size: 3rem;
-    line-height: 3.5rem;
+    font-size: 2.5rem;
+    line-height: 3rem;
   }
 }
 

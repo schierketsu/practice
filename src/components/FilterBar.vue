@@ -19,7 +19,7 @@
     </div>
     
     <div class="flex flex-col sm:flex-row gap-3 mb-4">
-      <div class="relative flex-1">
+      <div class="relative flex-1" :class="{ 'z-30': dropdowns.frontend }">
         <button
           @click="toggleDropdown('frontend')"
           class="w-full px-4 py-2 bg-gray-100 dark:bg-[#1a1a1a] text-gray-800 dark:text-white rounded-lg border border-transparent dark:border-white hover:bg-gray-200 dark:hover:bg-[#2a2a2a] transition-colors font-medium text-sm sm:text-base flex items-center justify-between"
@@ -37,7 +37,7 @@
         </button>
         <div 
           v-if="dropdowns.frontend"
-          class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto"
+          class="absolute top-full left-0 right-0 z-[100] mt-2 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white dark:bg-[#1a1a1a]"
         >
           <div class="p-2 flex flex-wrap gap-2">
             <button
@@ -58,7 +58,7 @@
         </div>
       </div>
       
-      <div class="relative flex-1">
+      <div class="relative flex-1" :class="{ 'z-30': dropdowns.backend }">
         <button
           @click="toggleDropdown('backend')"
           class="w-full px-4 py-2 bg-gray-100 dark:bg-[#1a1a1a] text-gray-800 dark:text-white rounded-lg border border-transparent dark:border-white hover:bg-gray-200 dark:hover:bg-[#2a2a2a] transition-colors font-medium text-sm sm:text-base flex items-center justify-between"
@@ -76,7 +76,7 @@
         </button>
         <div 
           v-if="dropdowns.backend"
-          class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto"
+          class="absolute top-full left-0 right-0 z-[100] mt-2 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white dark:bg-[#1a1a1a]"
         >
           <div class="p-2 flex flex-wrap gap-2">
             <button
@@ -166,6 +166,7 @@ function toggleTechnology(tech) {
 
 function clearFilters() {
   store.setTechnologiesFilter([])
+  store.dismissMobileMapCompanyCard()
 }
 
 function getTechStyle(tech) {
@@ -181,11 +182,18 @@ function getTechStyle(tech) {
   font-family: 'Polonium', serif;
   color: rgb(33 33 33);
   margin: 0;
-  font-size: 1.875rem;
-  line-height: 2.25rem;
+  font-size: 1.125rem;
+  line-height: 1.25rem;
   font-weight: 900;
   text-transform: uppercase;
   -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 640px) {
+  .filter-placeholder-heading {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
 }
 
 .filter-placeholder-brace {

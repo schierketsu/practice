@@ -25,7 +25,7 @@
     
     <div class="flex flex-col gap-3 mb-4">
       <!-- Город -->
-      <div class="relative">
+      <div class="relative" :class="{ 'z-30': dropdowns.city }">
         <label class="block font-medium text-xs sm:text-base text-black dark:text-white mb-2">
           город
         </label>
@@ -46,7 +46,7 @@
         </button>
         <div 
           v-if="dropdowns.city"
-          class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto"
+          class="absolute top-full left-0 right-0 z-[100] mt-2 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white dark:bg-[#1a1a1a]"
         >
           <button
             @click="selectCity('')"
@@ -66,7 +66,7 @@
       </div>
 
       <!-- Университет -->
-      <div class="relative mt-4">
+      <div class="relative mt-4" :class="{ 'z-30': dropdowns.university }">
         <label class="block font-medium text-xs sm:text-base text-black dark:text-white mb-2">
           университет
         </label>
@@ -88,7 +88,7 @@
         </button>
         <div 
           v-if="dropdowns.university"
-          class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto"
+          class="absolute top-full left-0 right-0 z-[100] mt-2 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white dark:bg-[#1a1a1a]"
         >
           <button
             @click="selectUniversity('')"
@@ -108,7 +108,7 @@
       </div>
 
       <!-- Факультет -->
-      <div class="relative mt-4">
+      <div class="relative mt-4" :class="{ 'z-30': dropdowns.faculty }">
         <label class="block font-medium text-xs sm:text-base text-black dark:text-white mb-2">
           факультет
         </label>
@@ -130,7 +130,7 @@
         </button>
         <div 
           v-if="dropdowns.faculty"
-          class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto"
+          class="absolute top-full left-0 right-0 z-[100] mt-2 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white dark:bg-[#1a1a1a]"
         >
           <button
             @click="selectFaculty('')"
@@ -242,6 +242,7 @@ function selectFaculty(faculty) {
 
 function clearFilters() {
   store.setLocationFilters('', '', '')
+  store.dismissMobileMapCompanyCard()
   dropdowns.value.city = false
   dropdowns.value.university = false
   dropdowns.value.faculty = false
@@ -258,11 +259,18 @@ function toLowerCaseFirst(str) {
   font-family: 'Polonium', serif;
   color: rgb(33 33 33);
   margin: 0;
-  font-size: 1.875rem;
-  line-height: 2.25rem;
+  font-size: 1.125rem;
+  line-height: 1.25rem;
   font-weight: 900;
   text-transform: uppercase;
   -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 640px) {
+  .filter-placeholder-heading {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
 }
 
 .filter-placeholder-brace {

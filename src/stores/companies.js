@@ -126,12 +126,20 @@ export const useCompaniesStore = defineStore('companies', () => {
     selectedFaculty.value = faculty || ''
   }
 
+  /** Выбранная компания на мобильной карте (нижняя панель); сброс из dismiss / clearFilters */
+  const mobileMapSelectedCompanyId = ref(null)
+
+  function dismissMobileMapCompanyCard() {
+    mobileMapSelectedCompanyId.value = null
+  }
+
   function clearFilters() {
     selectedTechnologies.value = []
     searchQuery.value = ''
     selectedCity.value = ''
     selectedUniversity.value = ''
     selectedFaculty.value = ''
+    dismissMobileMapCompanyCard()
   }
 
   function getCompanyById(id) {
@@ -158,6 +166,8 @@ export const useCompaniesStore = defineStore('companies', () => {
     setSearchQuery,
     setLocationFilters,
     clearFilters,
+    dismissMobileMapCompanyCard,
+    mobileMapSelectedCompanyId,
     getCompanyById,
   }
 })

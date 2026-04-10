@@ -1,7 +1,9 @@
 <template>
-  <div class="min-h-screen bg-[#F9FAFB] flex flex-col">
+  <div class="min-h-screen min-h-[100dvh] bg-[#F9FAFB] flex flex-col overflow-x-hidden">
     <header class="bg-[#F9FAFB]">
-      <div class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+      <div
+        class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4 pt-[max(0.75rem,env(safe-area-inset-top))]"
+      >
         <div class="flex items-center justify-between gap-2 flex-wrap">
           <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
             <router-link
@@ -45,7 +47,7 @@
         </div>
       </div>
     </header>
-    <main class="flex-1">
+    <main class="flex-1 min-w-0 overflow-x-hidden">
       <RouterView />
     </main>
     <Footer />

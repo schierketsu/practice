@@ -18,8 +18,12 @@
             {{ getPlaceholderText(company.name) }}
           </div>
         </div>
-        <div class="flex-1 flex flex-col justify-center min-h-12 sm:min-h-16">
-          <h3 class="text-xl sm:text-2xl md:text-3xl font-extrabold mb-0.5 leading-tight text-black dark:text-white">{{ company.name }}</h3>
+        <div class="flex-1 flex flex-col justify-center min-h-12 sm:min-h-16 min-w-0">
+          <h3
+            class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold mb-0.5 leading-tight text-black dark:text-white break-words"
+          >
+            {{ company.name }}
+          </h3>
           <p class="text-sm sm:text-base text-gray-500 dark:text-white leading-tight">
             {{ company.sector }}
           </p>
