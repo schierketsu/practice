@@ -77,6 +77,34 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
+  async function updateProfile(body) {
+    await apiFetch('/api/profile', {
+      method: 'PUT',
+      body,
+      token: token.value,
+    })
+    await fetchMe()
+  }
+
+  async function uploadResume(file) {
+    const fd = new FormData()
+    fd.append('resume', file)
+    const data = await apiFetch('/api/profile/resume', {
+      method: 'POST',
+      body: fd,
+      token: token.value,
+    })
+    user.value = data.user
+  }
+
+  async function deleteResume() {
+    const data = await apiFetch('/api/profile/resume', {
+      method: 'DELETE',
+      token: token.value,
+    })
+    user.value = data.user
+  }
+
   return {
     token,
     user,
@@ -90,5 +118,8 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     changePassword,
+    updateProfile,
+    uploadResume,
+    deleteResume,
   }
 })

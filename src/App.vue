@@ -23,39 +23,19 @@
               <span class="sm:hidden">назад</span>
             </button>
             <button
-              v-if="auth.isAuthenticated"
-              type="button"
-              class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base whitespace-nowrap"
-              @click="auth.logout()"
-            >
-              выход
-            </button>
-            <button
-              v-else
+              v-if="!auth.isAuthenticated"
               type="button"
               class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base whitespace-nowrap"
               @click="loginModalOpen = true"
             >
               вход
             </button>
-            <router-link
-              v-if="auth.isAdmin"
-              to="/админ"
-              class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base inline-block no-underline whitespace-nowrap"
-            >
-              админ
-            </router-link>
           </div>
-          <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <div
+            v-if="showPracticesNavLink"
+            class="flex items-center gap-2 sm:gap-3 flex-wrap"
+          >
             <router-link
-              v-if="$route.path !== '/стажировки'"
-              to="/стажировки"
-              class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base inline-block no-underline whitespace-nowrap"
-            >
-              стажировки
-            </router-link>
-            <router-link
-              v-else
               to="/практики"
               class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base inline-block no-underline whitespace-nowrap"
             >
@@ -90,10 +70,12 @@ const router = useRouter()
 const loginModalOpen = ref(false)
 const registerModalOpen = ref(false)
 
-const isProfileRoute = computed(() => route.path === '/профиль')
+const isProfileRoute = computed(() => route.path.startsWith('/профиль'))
+/** Ссылка «практики» справа — не на главной со списком компаний */
+const showPracticesNavLink = computed(() => route.name !== 'home')
 
 function saveProfileReturnPath() {
-  if (route.path !== '/профиль') {
+  if (!route.path.startsWith('/профиль')) {
     sessionStorage.setItem(PROFILE_HEADER_RETURN_KEY, route.fullPath)
   }
 }
@@ -124,7 +106,7 @@ provide('openRegisterModal', () => {
 </script>
 
 <style scoped>
-/* Как футер (bg-blue-700): синий фон, белый текст. Hover: акцент #85CBFA, тень как раньше. */
+/* Синий фон, белый текст. Hover: белый фон (вместо голубого), тёмный текст, тень как раньше. */
 .header-btn {
   font-family: 'Polonium', serif;
   letter-spacing: 0.06em;
@@ -137,7 +119,7 @@ provide('openRegisterModal', () => {
 }
 
 .header-btn:hover {
-  background-color: #85cbfa;
+  background-color: #fff;
   color: #212121;
   border: 2px solid #212121;
   box-shadow: 5px 5px 0 0 #212121;

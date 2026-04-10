@@ -1,5 +1,13 @@
 <template>
   <div class="w-full h-full min-h-[400px] sm:min-h-[500px] rounded-lg overflow-hidden border-l border-t border-b border-gray-200 dark:border-white map-wrap" style="border-right: none;">
+    <div
+      class="map-loading-placeholder absolute inset-0 z-[20] flex items-center justify-center bg-gray-100 text-gray-700 transition-opacity duration-200 dark:bg-[#1a1a1a] dark:text-gray-200"
+      :class="mapReady ? 'pointer-events-none opacity-0' : 'opacity-100'"
+      :aria-busy="!mapReady"
+      aria-live="polite"
+    >
+      <p class="map-loading-text font-medium text-base sm:text-lg">Ожидайте...</p>
+    </div>
     <div ref="mapContainer" class="w-full h-full min-h-[400px] sm:min-h-[500px] map-container"></div>
   </div>
 </template>
@@ -11,10 +19,15 @@ import { ref, onMounted, onUnmounted, watch, computed, shallowRef, markRaw } fro
 import { useCompaniesStore } from '../stores/companies'
 import { useThemeStore } from '../stores/theme'
 
+let markersUpdateScheduled = null
+let resizeRaf = null
+
 const mapContainer = ref(null)
 const map = shallowRef(null)
+const mapReady = ref(false)
 let markers = []
 let resizeObserver = null
+let revealFallbackTimer = null
 
 const store = useCompaniesStore()
 const themeStore = useThemeStore()
@@ -22,6 +35,8 @@ const themeStore = useThemeStore()
 // MapTiler использует [lng, lat]; центр — Европейская часть России
 const defaultCenter = [40.0, 55.5]
 const defaultZoom = 5
+/** Плавное перемещение камеры при смене города / границ (мс) */
+const CAMERA_DURATION_MS = 1600
 
 const filteredCompanies = computed(() => store.filteredCompanies)
 const isDark = computed(() => themeStore.isDark)
@@ -43,7 +58,19 @@ function getTechStyle(tech, isSelected) {
   return 'background-color: #1D4ED8; color: #ffffff'
 }
 
+/** Ширина попапа: при длинном названии шире, чтобы не рвалось по одной букве в узкой колонке */
+function getPopupSizing(name) {
+  const len = [...(name || '')].length
+  let maxPx = 320
+  if (len > 14) maxPx = 460
+  else if (len > 10) maxPx = 420
+  else if (len > 8) maxPx = 400
+  else if (len > 6) maxPx = 360
+  return `${maxPx}px`
+}
+
 function createPopupContent(company) {
+  const maxW = getPopupSizing(company.name)
   const bgColor = isDark.value ? '#1a1a1a' : '#ffffff'
   const textColor = isDark.value ? '#ffffff' : '#212121'
   const textSecondary = isDark.value ? '#a0a0a0' : '#666666'
@@ -65,9 +92,9 @@ function createPopupContent(company) {
     : ''
 
   return `
-    <div style="min-width: 280px; max-width: 320px; font-family: 'JetBrains Mono', ui-monospace, monospace; background-color: ${bgColor}; border-radius: 12px; overflow: hidden; position: relative;">
+    <div style="min-width: 280px; max-width: ${maxW}; width: max-content; box-sizing: border-box; font-family: 'JetBrains Mono', ui-monospace, monospace; background-color: ${bgColor}; border-radius: 12px; overflow: hidden; position: relative;">
       <div style="padding: 16px; padding-right: 60px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
           <div style="width: 48px; height: 48px; border-radius: 8px; border: 1px solid ${borderColor}; background-color: ${isDark.value ? '#2a2a2a' : '#f3f4f6'}; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative;">
             <img
               src="${company.logo}"
@@ -80,7 +107,7 @@ function createPopupContent(company) {
             </div>
           </div>
           <div style="flex: 1; min-width: 0;">
-            <h3 style="font-weight: 800; font-size: 18px; margin: 0 0 4px 0; color: ${textColor}; line-height: 1.2; word-wrap: break-word;">${company.name}</h3>
+            <h3 style="font-weight: 800; font-size: 18px; margin: 0 0 4px 0; color: ${textColor}; line-height: 1.25; word-break: normal; overflow-wrap: break-word;">${company.name}</h3>
             <p style="font-size: 13px; color: ${textSecondary}; margin: 0; line-height: 1.3;">${company.sector}</p>
           </div>
         </div>
@@ -114,7 +141,7 @@ function updateMarkers() {
 
         const popup = new Popup({
           closeButton: false,
-          maxWidth: '320px',
+          maxWidth: getPopupSizing(company.name),
           className: isDark.value ? 'dark-popup' : 'light-popup'
         }).setHTML(createPopupContent(company))
 
@@ -128,10 +155,14 @@ function updateMarkers() {
     })
   }
 
-  // Область отображения
+  // Область отображения (плавный зум / перелёт камеры)
   if (!store.selectedCity) {
-    map.value.setCenter(defaultCenter)
-    map.value.setZoom(defaultZoom)
+    map.value.flyTo({
+      center: defaultCenter,
+      zoom: defaultZoom,
+      duration: CAMERA_DURATION_MS,
+      essential: true,
+    })
   } else {
     const cityCompanies = store.companies.filter((c) => c.city === store.selectedCity)
     const cityCoords = cityCompanies
@@ -147,18 +178,38 @@ function updateMarkers() {
         const latSpan = Math.max(0.01, (Math.max(...lats) - Math.min(...lats)) * (1 + padding))
         const sw = [Math.min(...lngs) - lngSpan * padding, Math.min(...lats) - latSpan * padding]
         const ne = [Math.max(...lngs) + lngSpan * padding, Math.max(...lats) + latSpan * padding]
-        map.value.fitBounds([sw, ne], { padding: 40, maxZoom: 14 })
+        map.value.fitBounds([sw, ne], {
+          padding: 40,
+          maxZoom: 14,
+          duration: CAMERA_DURATION_MS,
+        })
       } else {
         const avgLng = cityCoords.reduce((s, c) => s + c[0], 0) / cityCoords.length
         const avgLat = cityCoords.reduce((s, c) => s + c[1], 0) / cityCoords.length
-        map.value.setCenter([avgLng, avgLat])
-        map.value.setZoom(12)
+        map.value.flyTo({
+          center: [avgLng, avgLat],
+          zoom: 12,
+          duration: CAMERA_DURATION_MS,
+          essential: true,
+        })
       }
     } else {
-      map.value.setCenter(defaultCenter)
-      map.value.setZoom(defaultZoom)
+      map.value.flyTo({
+        center: defaultCenter,
+        zoom: defaultZoom,
+        duration: CAMERA_DURATION_MS,
+        essential: true,
+      })
     }
   }
+}
+
+function scheduleUpdateMarkers() {
+  if (markersUpdateScheduled != null) clearTimeout(markersUpdateScheduled)
+  markersUpdateScheduled = window.setTimeout(() => {
+    markersUpdateScheduled = null
+    updateMarkers()
+  }, 80)
 }
 
 onMounted(() => {
@@ -180,13 +231,33 @@ onMounted(() => {
 
   map.value.on('load', () => {
     setTimeout(() => {
-      map.value?.resize()
+      const m = map.value
+      if (!m) return
+      m.resize()
       updateMarkers()
+      const reveal = () => {
+        if (mapReady.value) return
+        mapReady.value = true
+        if (revealFallbackTimer != null) {
+          clearTimeout(revealFallbackTimer)
+          revealFallbackTimer = null
+        }
+        requestAnimationFrame(() => m.resize())
+      }
+      // idle часто срабатывает при каждом кадре/тайлах — даёт лаги; показываем карту после первой отрисовки
+      requestAnimationFrame(() => {
+        requestAnimationFrame(reveal)
+      })
+      revealFallbackTimer = window.setTimeout(reveal, 12000)
     }, 100)
   })
 
   resizeObserver = new ResizeObserver(() => {
-    map.value?.resize()
+    if (resizeRaf != null) cancelAnimationFrame(resizeRaf)
+    resizeRaf = requestAnimationFrame(() => {
+      resizeRaf = null
+      map.value?.resize()
+    })
   })
   resizeObserver.observe(mapContainer.value)
 
@@ -195,18 +266,30 @@ onMounted(() => {
   if (map.value) map.value._resizeHandler = handleResize
 })
 
-watch(filteredCompanies, () => updateMarkers(), { deep: true })
+watch(filteredCompanies, () => scheduleUpdateMarkers(), { deep: true })
 
 watch(
   [isDark, () => store.selectedTechnologies],
   () => {
-    updateMarkers()
+    scheduleUpdateMarkers()
     setTimeout(() => map.value?.resize(), 100)
   },
   { deep: true }
 )
 
 onUnmounted(() => {
+  if (markersUpdateScheduled != null) {
+    clearTimeout(markersUpdateScheduled)
+    markersUpdateScheduled = null
+  }
+  if (resizeRaf != null) {
+    cancelAnimationFrame(resizeRaf)
+    resizeRaf = null
+  }
+  if (revealFallbackTimer != null) {
+    clearTimeout(revealFallbackTimer)
+    revealFallbackTimer = null
+  }
   if (resizeObserver && mapContainer.value) {
     resizeObserver.unobserve(mapContainer.value)
     resizeObserver.disconnect()
@@ -230,6 +313,11 @@ onUnmounted(() => {
 .map-container {
   position: absolute;
   inset: 0;
+}
+
+.map-loading-text {
+  font-family: 'Polonium', serif;
+  letter-spacing: 0.06em;
 }
 
 /* MapTiler SDK — скрываем атрибуцию и водяной знак (логотип) */

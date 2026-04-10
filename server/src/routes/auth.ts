@@ -8,8 +8,26 @@ import { requireAuth } from '../middleware/auth.js'
 
 const router = Router()
 
-function publicUser(u: { id: string; email: string; role: string }) {
-  return { id: u.id, email: u.email, role: u.role }
+function publicUser(u: {
+  id: string
+  email: string
+  role: string
+  firstName?: string | null
+  lastName?: string | null
+  resumeStoredPath?: string | null
+  resumeOriginalName?: string | null
+  resumeUploadedAt?: Date | null
+}) {
+  return {
+    id: u.id,
+    email: u.email,
+    role: u.role,
+    firstName: u.firstName ?? '',
+    lastName: u.lastName ?? '',
+    resumeOriginalName: u.resumeOriginalName ?? null,
+    resumeUploadedAt: u.resumeUploadedAt ? new Date(u.resumeUploadedAt).toISOString() : null,
+    hasResume: !!(u.resumeStoredPath && u.resumeOriginalName),
+  }
 }
 
 router.post('/register', async (req, res) => {

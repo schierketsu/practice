@@ -1,11 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import CompanyDetailView from '../views/CompanyDetailView.vue'
-import InternshipsView from '../views/InternshipsView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
-import ProfileView from '../views/ProfileView.vue'
-import AdminLayout from '../views/admin/AdminLayout.vue'
+import ProfileLayout from '../views/ProfileLayout.vue'
+import ProfileSettingsView from '../views/ProfileSettingsView.vue'
 import AdminUsersView from '../views/admin/AdminUsersView.vue'
 import AdminCompaniesView from '../views/admin/AdminCompaniesView.vue'
 import AdminReviewsView from '../views/admin/AdminReviewsView.vue'
@@ -26,8 +25,7 @@ const router = createRouter({
     },
     {
       path: '/стажировки',
-      name: 'internships',
-      component: InternshipsView,
+      redirect: '/практики',
       alias: ['/%D1%81%D1%82%D0%B0%D0%B6%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8'],
     },
     {
@@ -52,32 +50,41 @@ const router = createRouter({
     },
     {
       path: '/профиль',
-      name: 'profile',
-      component: ProfileView,
+      component: ProfileLayout,
       meta: { requiresAuth: true },
-    },
-    {
-      path: '/админ',
-      component: AdminLayout,
-      meta: { requiresAuth: true, requiresAdmin: true },
       children: [
-        { path: '', redirect: { name: 'admin-users' } },
+        {
+          path: '',
+          name: 'profile-settings',
+          component: ProfileSettingsView,
+        },
         {
           path: 'пользователи',
           name: 'admin-users',
           component: AdminUsersView,
+          meta: { requiresAdmin: true },
         },
         {
           path: 'компании',
           name: 'admin-companies',
           component: AdminCompaniesView,
+          meta: { requiresAdmin: true },
         },
         {
           path: 'отклики',
           name: 'admin-reviews',
           component: AdminReviewsView,
+          meta: { requiresAdmin: true },
         },
       ],
+    },
+    {
+      path: '/админ',
+      redirect: '/профиль/пользователи',
+    },
+    {
+      path: '/админ/:pathMatch(.*)',
+      redirect: (to) => `/профиль/${to.params.pathMatch}`,
     },
   ],
 })
@@ -100,8 +107,13 @@ router.beforeEach((to, from, next) => {
     next({ path: '/вход', query: { redirect: to.fullPath } })
     return
   }
-  if (to.meta.requiresAdmin && !auth.isAdmin) {
-    next({ path: '/практики' })
+  const needsAdmin = to.matched.some((r) => r.meta.requiresAdmin)
+  if (needsAdmin && !auth.isAdmin) {
+    next({ path: '/профиль' })
+    return
+  }
+  if (to.path === '/профиль' && auth.isAuthenticated && auth.isAdmin) {
+    next({ path: '/профиль/пользователи', replace: true })
     return
   }
   if (to.meta.guestOnly && auth.isAuthenticated) {

@@ -18,10 +18,10 @@ export const registerFormSchema = z
   })
   .superRefine((data, ctx) => {
     const pwd = data.password.trim()
-    if (pwd.length < 12) {
+    if (pwd.length < 8) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Пароль не короче 12 символов',
+        message: 'Пароль не короче 8 символов',
         path: ['password'],
       })
     }
@@ -29,34 +29,6 @@ export const registerFormSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Уберите пробелы в начале и в конце пароля',
-        path: ['password'],
-      })
-    }
-    if (!/[a-zа-яё]/.test(pwd)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Нужна хотя бы одна строчная буква',
-        path: ['password'],
-      })
-    }
-    if (!/[A-ZА-ЯЁ]/.test(pwd)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Нужна хотя бы одна заглавная буква',
-        path: ['password'],
-      })
-    }
-    if (!/\d/.test(pwd)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Нужна хотя бы одна цифра',
-        path: ['password'],
-      })
-    }
-    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(pwd)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Нужен хотя бы один спецсимвол',
         path: ['password'],
       })
     }
@@ -90,20 +62,15 @@ export const changePasswordFormSchema = z
   })
   .superRefine((data, ctx) => {
     const pwd = data.password.trim()
-    if (pwd.length < 12) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Пароль не короче 12 символов', path: ['password'] })
+    if (pwd.length < 8) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Пароль не короче 8 символов', path: ['password'] })
     }
-    if (!/[a-zа-яё]/.test(pwd)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Нужна строчная буква', path: ['password'] })
-    }
-    if (!/[A-ZА-ЯЁ]/.test(pwd)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Нужна заглавная буква', path: ['password'] })
-    }
-    if (!/\d/.test(pwd)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Нужна цифра', path: ['password'] })
-    }
-    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(pwd)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Нужен спецсимвол', path: ['password'] })
+    if (data.password !== data.password.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Уберите пробелы в начале и в конце пароля',
+        path: ['password'],
+      })
     }
     if (data.passwordConfirm.trim() !== pwd) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Пароли не совпадают', path: ['passwordConfirm'] })

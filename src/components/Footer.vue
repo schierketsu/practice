@@ -11,7 +11,7 @@
           <p class="text-sm text-white">
             сделано с любовью к хорошим практикам
           </p>
-          <p class="text-sm text-white">©2025</p>
+          <p class="text-sm text-white">©2025–2026</p>
         </div>
       </div>
     </div>

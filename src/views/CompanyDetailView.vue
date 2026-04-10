@@ -131,7 +131,7 @@
       
       <!-- Кнопка подачи заявки -->
       <button
-        class="w-full py-2.5 sm:py-3 bg-[#1D4ED8] text-white rounded-none border-4 border-black hover:bg-[#164bc2] transition-colors font-semibold text-sm sm:text-base lg:text-lg"
+        class="w-full py-2.5 sm:py-3 bg-[#1D4ED8] text-white rounded-b-lg rounded-t-none hover:bg-[#164bc2] transition-colors font-semibold text-sm sm:text-base lg:text-lg"
       >
         подать заявку на практику
       </button>
@@ -143,56 +143,117 @@
       <div class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8">
       <div class="reviews-layer rounded-lg overflow-hidden">
       <div class="pt-4 pr-4 pb-4 sm:pt-6 sm:pr-6 sm:pb-6 lg:pt-8 lg:pr-8 lg:pb-8 pl-4 sm:pl-6 lg:pl-8">
-        <h2 class="about-company-heading">ОТКЛИКИ</h2>
-        <div v-if="reviewsLoading" class="text-gray-500 text-sm py-4">Загрузка откликов…</div>
-        <div v-else class="mb-6 p-4 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-600 rounded-lg">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Оставить отклик</h3>
-          <p v-if="!auth.isAuthenticated" class="text-sm text-gray-600 dark:text-gray-400">
-            <router-link :to="{ path: '/вход', query: { redirect: $route.fullPath } }" class="text-[#1D4ED8] underline">
-              Войдите
-            </router-link>
-            , чтобы отправить отклик (после модерации он появится в списке).
+        <h2 class="about-company-heading mb-4 sm:mb-6">ОТКЛИКИ</h2>
+        <div v-if="reviewsLoading" class="text-gray-500 text-sm py-4 mb-6">Загрузка откликов…</div>
+        <div v-else class="mb-6 p-4 sm:p-6 bg-gray-50 dark:bg-[#2a2a2a] rounded-lg">
+          <template v-if="!auth.isAuthenticated">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3">Нам важно твоё мнение</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              <router-link :to="{ path: '/вход', query: { redirect: $route.fullPath } }" class="text-[#1D4ED8] underline">
+                Войдите
+              </router-link>
+              , чтобы отправить отклик (после модерации он появится в списке).
+            </p>
+          </template>
+          <p
+            v-else-if="myReviewLoading"
+            class="text-sm text-gray-500 dark:text-gray-400"
+          >
+            Проверка статуса отклика…
           </p>
-          <form v-else class="flex flex-col gap-2 text-sm" @submit.prevent="submitReview">
+          <div
+            v-else-if="myReviewStatus === 'PENDING'"
+            class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4 w-full"
+          >
+            <p class="text-base sm:text-lg font-semibold text-green-700 dark:text-green-400 flex-1 min-w-0">
+              Отклик отправлен и ожидает модерации.
+            </p>
+            <button
+              type="button"
+              :disabled="reviewDeleting"
+              class="shrink-0 px-4 py-2 text-sm font-medium rounded-lg bg-[#1D4ED8] text-white hover:bg-[#164bc2] transition-colors disabled:opacity-50"
+              @click="deleteMyReview"
+            >
+              {{ reviewDeleting ? 'Удаление…' : 'Удалить отзыв' }}
+            </button>
+            <p v-if="reviewFormError" class="text-red-600 text-sm w-full basis-full order-last">{{ reviewFormError }}</p>
+          </div>
+          <div
+            v-else-if="myReviewStatus === 'APPROVED'"
+            class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4 w-full"
+          >
+            <p class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200 flex-1 min-w-0">
+              Ваш отзыв успешно опубликован!
+            </p>
+            <button
+              type="button"
+              :disabled="reviewDeleting"
+              class="shrink-0 px-4 py-2 text-sm font-medium rounded-lg bg-[#1D4ED8] text-white hover:bg-[#164bc2] transition-colors disabled:opacity-50"
+              @click="deleteMyReview"
+            >
+              {{ reviewDeleting ? 'Удаление…' : 'Удалить отзыв' }}
+            </button>
+            <p v-if="reviewFormError" class="text-red-600 text-sm w-full basis-full order-last">{{ reviewFormError }}</p>
+          </div>
+          <template v-else>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3">Нам важно твоё мнение</h3>
+            <form class="flex flex-col gap-3 text-sm" @submit.prevent="submitReview">
             <textarea
               v-model="reviewForm.text"
               required
+              minlength="10"
               rows="3"
               placeholder="Текст отклика (от 10 символов)"
-              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white"
             />
-            <div class="flex flex-wrap gap-2 items-center">
-              <label class="flex items-center gap-1">
-                Оценка
-                <select v-model.number="reviewForm.rating" class="border rounded px-2 py-1 dark:bg-[#2a2a2a]">
-                  <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
-                </select>
-              </label>
+            <div>
+              <label class="block font-medium text-gray-800 dark:text-gray-200 mb-1">Оценка</label>
+              <select
+                v-model.number="reviewForm.rating"
+                class="w-full max-w-[12rem] border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white"
+              >
+                <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
+              </select>
             </div>
-            <input
-              v-model="reviewForm.employment"
-              required
-              placeholder="Трудоустройство (как в примерах ниже)"
-              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 dark:bg-[#2a2a2a]"
-            />
-            <input
-              v-model="reviewForm.location"
-              required
-              placeholder="Локация практики"
-              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 dark:bg-[#2a2a2a]"
-            />
-            <input
-              v-model="reviewForm.periodLabel"
-              placeholder="Период (например: лето 2025)"
-              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 dark:bg-[#2a2a2a]"
-            />
-            <input
-              v-model="reviewForm.authorDisplay"
-              placeholder="Как отображать имя (необязательно)"
-              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 dark:bg-[#2a2a2a]"
-            />
+            <div>
+              <label class="block font-medium text-gray-800 dark:text-gray-200 mb-1">Трудоустройство после практики</label>
+              <select
+                v-model="reviewForm.employment"
+                required
+                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white"
+              >
+                <option value="" disabled>Выберите вариант</option>
+                <option value="Предложили">Предложили</option>
+                <option value="Нет">Нет</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-medium text-gray-800 dark:text-gray-200 mb-1">Год практики</label>
+              <select
+                v-model="reviewForm.periodLabel"
+                required
+                class="w-full max-w-[12rem] border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white"
+              >
+                <option value="" disabled>Год</option>
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-medium text-gray-800 dark:text-gray-200 mb-1">Формат работы</label>
+              <select
+                v-model="reviewForm.location"
+                required
+                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white"
+              >
+                <option value="" disabled>Как проходила практика</option>
+                <option value="Гибрид — офис и удалённо">Гибрид — офис и удалённо</option>
+                <option value="Очно в офисе">Очно в офисе</option>
+                <option value="Удалённо">Удалённо</option>
+              </select>
+            </div>
             <p v-if="reviewFormError" class="text-red-600 text-sm">{{ reviewFormError }}</p>
-            <p v-if="reviewFormSuccess" class="text-green-700 text-sm">{{ reviewFormSuccess }}</p>
             <button
               type="submit"
               :disabled="reviewSubmitting"
@@ -201,8 +262,9 @@
               {{ reviewSubmitting ? 'Отправка…' : 'Отправить на модерацию' }}
             </button>
           </form>
+          </template>
         </div>
-        <div class="space-y-4 sm:space-y-6">
+        <div class="space-y-4 sm:space-y-6 mt-8 sm:mt-10">
           <div
             v-for="review in reviews"
             :key="review.id"
@@ -271,8 +333,11 @@ const pageLoading = ref(true)
 const reviews = ref([])
 const reviewsLoading = ref(false)
 const reviewFormError = ref('')
-const reviewFormSuccess = ref('')
 const reviewSubmitting = ref(false)
+const reviewDeleting = ref(false)
+/** null | PENDING | APPROVED | REJECTED — с сервера, сохраняется между визитами */
+const myReviewStatus = ref(null)
+const myReviewLoading = ref(false)
 
 const reviewForm = reactive({
   text: '',
@@ -280,7 +345,6 @@ const reviewForm = reactive({
   employment: '',
   location: '',
   periodLabel: '',
-  authorDisplay: '',
 })
 
 const isDark = computed(() => themeStore.isDark)
@@ -304,6 +368,24 @@ async function loadReviews() {
   }
 }
 
+async function loadMyReview() {
+  const id = route.params.id
+  if (!id || !auth.isAuthenticated || !auth.token) {
+    myReviewStatus.value = null
+    myReviewLoading.value = false
+    return
+  }
+  myReviewLoading.value = true
+  try {
+    const data = await apiFetch(`/api/companies/${id}/my-review`, { token: auth.token })
+    myReviewStatus.value = data.status ?? null
+  } catch {
+    myReviewStatus.value = null
+  } finally {
+    myReviewLoading.value = false
+  }
+}
+
 async function ensureCompany() {
   pageLoading.value = true
   if (!store.loaded) {
@@ -311,6 +393,7 @@ async function ensureCompany() {
   }
   pageLoading.value = false
   await loadReviews()
+  await loadMyReview()
 }
 
 onMounted(ensureCompany)
@@ -318,15 +401,41 @@ onMounted(ensureCompany)
 watch(
   () => route.params.id,
   () => {
+    myReviewStatus.value = null
     ensureCompany()
-    reviewFormSuccess.value = ''
     reviewFormError.value = ''
   }
 )
 
+watch(
+  () => auth.isAuthenticated,
+  async (loggedIn) => {
+    if (loggedIn && route.params.id) await loadMyReview()
+    else {
+      myReviewStatus.value = null
+      myReviewLoading.value = false
+    }
+  }
+)
+
+async function deleteMyReview() {
+  const id = route.params.id
+  if (!id || !auth.token) return
+  reviewFormError.value = ''
+  reviewDeleting.value = true
+  try {
+    await apiFetch(`/api/companies/${id}/my-review`, { method: 'DELETE', token: auth.token })
+    myReviewStatus.value = null
+    await loadReviews()
+  } catch (e) {
+    reviewFormError.value = e.message || 'Не удалось удалить отзыв'
+  } finally {
+    reviewDeleting.value = false
+  }
+}
+
 async function submitReview() {
   reviewFormError.value = ''
-  reviewFormSuccess.value = ''
   const id = route.params.id
   reviewSubmitting.value = true
   try {
@@ -338,16 +447,14 @@ async function submitReview() {
         employment: reviewForm.employment.trim(),
         location: reviewForm.location.trim(),
         periodLabel: reviewForm.periodLabel.trim() || undefined,
-        authorDisplay: reviewForm.authorDisplay.trim() || undefined,
       },
       token: auth.token,
     })
-    reviewFormSuccess.value = 'Отклик отправлен и ожидает модерации.'
+    myReviewStatus.value = 'PENDING'
     reviewForm.text = ''
     reviewForm.employment = ''
     reviewForm.location = ''
     reviewForm.periodLabel = ''
-    reviewForm.authorDisplay = ''
   } catch (e) {
     reviewFormError.value = e.message || 'Не удалось отправить'
   } finally {
@@ -527,10 +634,9 @@ function handleTechImageError(event) {
   box-sizing: border-box;
 }
 
-/* Белая панель откликов — обводка как у reviews-dots-wrap */
+/* Белая панель откликов */
 .reviews-layer {
   background: #fff;
-  border: 4px solid #212121;
 }
 </style>
 
