@@ -35,17 +35,17 @@ function getTechStyle(tech, isSelected) {
   if (!isSelected) {
     return isDark.value
       ? 'background-color: #2a2a2a; color: #ffffff'
-      : 'background-color: #F3F4F6; color: #000000'
+      : 'background-color: #F3F4F6; color: #212121'
   }
   if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
-    return 'background-color: #A8E4A0; color: #000000'
+    return 'background-color: #A8E4A0; color: #212121'
   }
   return 'background-color: #1D4ED8; color: #ffffff'
 }
 
 function createPopupContent(company) {
   const bgColor = isDark.value ? '#1a1a1a' : '#ffffff'
-  const textColor = isDark.value ? '#ffffff' : '#000000'
+  const textColor = isDark.value ? '#ffffff' : '#212121'
   const textSecondary = isDark.value ? '#a0a0a0' : '#666666'
   const borderColor = isDark.value ? '#2a2a2a' : '#e5e7eb'
 
@@ -65,7 +65,7 @@ function createPopupContent(company) {
     : ''
 
   return `
-    <div style="min-width: 280px; max-width: 320px; font-family: 'Inter', sans-serif; background-color: ${bgColor}; border-radius: 12px; overflow: hidden; position: relative;">
+    <div style="min-width: 280px; max-width: 320px; font-family: 'JetBrains Mono', ui-monospace, monospace; background-color: ${bgColor}; border-radius: 12px; overflow: hidden; position: relative;">
       <div style="padding: 16px; padding-right: 60px;">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
           <div style="width: 48px; height: 48px; border-radius: 8px; border: 1px solid ${borderColor}; background-color: ${isDark.value ? '#2a2a2a' : '#f3f4f6'}; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative;">
@@ -263,12 +263,12 @@ onUnmounted(() => {
 :deep(.maptiler-popup-content-wrapper) {
   padding: 0;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px rgba(33, 33, 33, 0.15);
   overflow: hidden;
 }
 .dark :deep(.maplibregl-popup-content-wrapper),
 .dark :deep(.maptiler-popup-content-wrapper) {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 25px rgba(33, 33, 33, 0.5);
 }
 :deep(.maplibregl-popup-tip),
 :deep(.maptiler-popup-tip) {

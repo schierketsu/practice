@@ -5,7 +5,7 @@
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
       placeholder="Поиск..."
-      class="w-full px-3 py-2 sm:px-4 sm:py-2 pl-9 sm:pl-10 text-sm sm:text-base border border-gray-300 dark:border-white bg-white dark:bg-[#000000] text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
+      class="w-full px-3 py-2 sm:px-4 sm:py-2 pl-9 sm:pl-10 text-sm sm:text-base border border-gray-300 dark:border-white bg-white dark:bg-black text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500"
     />
     <svg
       class="absolute left-2.5 sm:left-3 top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400 dark:text-gray-500"

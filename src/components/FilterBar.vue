@@ -50,7 +50,7 @@
                   ? 'text-white'
                   : ''
               ]"
-              :style="selectedTechnologies.includes(tech) ? 'background-color: #1D4ED8' : 'background-color: #F3F4F6; color: #000000'"
+              :style="selectedTechnologies.includes(tech) ? 'background-color: #1D4ED8' : 'background-color: #F3F4F6; color: #212121'"
             >
               {{ tech }}
             </button>
@@ -89,7 +89,7 @@
                   ? ''
                   : ''
               ]"
-              :style="selectedTechnologies.includes(tech) ? 'background-color: #A8E4A0; color: #000000' : 'background-color: #F3F4F6; color: #000000'"
+              :style="selectedTechnologies.includes(tech) ? 'background-color: #A8E4A0; color: #212121' : 'background-color: #F3F4F6; color: #212121'"
             >
               {{ tech }}
             </button>
@@ -99,7 +99,7 @@
     </div>
 
     <div v-if="selectedTechnologies.length > 0" class="flex flex-wrap items-center gap-2">
-      <span class="text-sm sm:text-base font-extrabold text-[#000000] dark:text-white">Выбрано:</span>
+      <span class="text-sm sm:text-base font-extrabold text-black dark:text-white">Выбрано:</span>
       <button
         v-for="tech in selectedTechnologies"
         :key="tech"
@@ -170,7 +170,7 @@ function clearFilters() {
 
 function getTechStyle(tech) {
   if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
-    return 'background-color: #A8E4A0; color: #000000'
+    return 'background-color: #A8E4A0; color: #212121'
   }
   return 'background-color: #1D4ED8; color: #ffffff'
 }
@@ -178,8 +178,8 @@ function getTechStyle(tech) {
 
 <style scoped>
 .filter-placeholder-heading {
-  font-family: 'Space Grotesk', sans-serif;
-  color: rgb(10 10 10);
+  font-family: 'Polonium', serif;
+  color: rgb(33 33 33);
   margin: 0;
   font-size: 1.875rem;
   line-height: 2.25rem;

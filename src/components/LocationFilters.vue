@@ -26,7 +26,7 @@
     <div class="flex flex-col gap-3 mb-4">
       <!-- Город -->
       <div class="relative">
-        <label class="block font-medium text-xs sm:text-base text-[#000000] dark:text-white mb-2">
+        <label class="block font-medium text-xs sm:text-base text-black dark:text-white mb-2">
           город
         </label>
         <button
@@ -67,7 +67,7 @@
 
       <!-- Университет -->
       <div class="relative mt-4">
-        <label class="block font-medium text-xs sm:text-base text-[#000000] dark:text-white mb-2">
+        <label class="block font-medium text-xs sm:text-base text-black dark:text-white mb-2">
           университет
         </label>
         <button
@@ -109,7 +109,7 @@
 
       <!-- Факультет -->
       <div class="relative mt-4">
-        <label class="block font-medium text-xs sm:text-base text-[#000000] dark:text-white mb-2">
+        <label class="block font-medium text-xs sm:text-base text-black dark:text-white mb-2">
           факультет
         </label>
         <button
@@ -255,8 +255,8 @@ function toLowerCaseFirst(str) {
 
 <style scoped>
 .filter-placeholder-heading {
-  font-family: 'Space Grotesk', sans-serif;
-  color: rgb(10 10 10);
+  font-family: 'Polonium', serif;
+  color: rgb(33 33 33);
   margin: 0;
   font-size: 1.875rem;
   line-height: 2.25rem;

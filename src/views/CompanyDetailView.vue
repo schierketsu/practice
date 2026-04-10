@@ -385,8 +385,8 @@ function handleTechImageError(event) {
 
 <style scoped>
 .about-company-heading {
-  font-family: 'Space Grotesk', sans-serif;
-  color: rgb(10 10 10);
+  font-family: 'Polonium', serif;
+  color: rgb(33 33 33);
   margin: 0 0 1.5rem 0;
   font-size: 1.875rem;
   line-height: 2.25rem;
@@ -430,12 +430,12 @@ function handleTechImageError(event) {
 }
 
 .company-sector {
-  font-family: 'Space Grotesk', sans-serif;
-  color: rgb(10 10 10);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  color: rgb(33 33 33);
   margin: 0;
   font-size: 1rem;
   line-height: 1.375rem;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
   -webkit-tap-highlight-color: transparent;
 }
@@ -457,7 +457,7 @@ function handleTechImageError(event) {
 /* Область откликов на всю ширину, как слой с фильтрами и картой */
 .reviews-dots-wrap {
   background-color: #fafaf8;
-  background-image: radial-gradient(circle, #000 1px, transparent 1px);
+  background-image: radial-gradient(circle, #212121 1px, transparent 1px);
   background-size: 20px 20px;
   padding: 2.5rem 0;
   box-sizing: border-box;
@@ -466,7 +466,7 @@ function handleTechImageError(event) {
 /* Белая панель откликов — обводка как у reviews-dots-wrap */
 .reviews-layer {
   background: #fff;
-  border: 4px solid #000;
+  border: 4px solid #212121;
 }
 </style>
 

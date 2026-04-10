@@ -7,10 +7,14 @@ export default {
   darkMode: 'class',
   theme: {
     fontFamily: {
-      sans: ['Inter', 'sans-serif'],
+      sans: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+      polonium: ['Polonium', 'serif'],
     },
-    extend: {},
+    extend: {
+      colors: {
+        black: '#212121',
+      },
+    },
   },
   plugins: [],
 }
-

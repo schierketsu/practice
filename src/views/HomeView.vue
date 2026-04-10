@@ -1,13 +1,13 @@
 <template>
   <div class="filters-map-layer">
-    <div class="filters-map-layer-inner max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 w-full pb-4 sm:pb-8">
+    <div class="filters-map-layer-inner max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 w-full pb-4 sm:pb-8">
       <div class="relative">
         <div v-if="store.companies.length === 0" class="flex items-center justify-center min-h-[400px] sm:min-h-[500px]">
           <p class="text-gray-500 dark:text-white text-base sm:text-lg">Загрузка...</p>
         </div>
         <div v-else class="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-6">
-          <!-- Фильтры слева (1/3 ширины на десктопе) -->
-          <div class="filters-column w-full lg:w-1/3 flex-shrink-0 overflow-y-auto flex flex-col gap-4">
+          <!-- Фильтры слева (~40% на десктопе; контейнер max-w-screen-2xl шире max-w-7xl) -->
+          <div class="filters-column w-full lg:w-2/5 flex-shrink-0 overflow-y-auto flex flex-col gap-4">
             <LocationFilters />
 
             <!-- Фильтр по технологиям - показывается только для Чебоксары, ЧУВГУ ИМ. И. Н. УЛЬЯНОВА, факультет ИВТ -->
@@ -26,7 +26,7 @@
             >
               <div class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-xl max-w-md w-full overflow-hidden relative">
                 <div class="px-6 sm:px-8 pt-6 sm:pt-8 pb-6 text-center">
-                  <h3 class="text-xl sm:text-2xl font-extrabold text-[#000000] dark:text-white mb-4">
+                  <h3 class="text-xl sm:text-2xl font-extrabold text-black dark:text-white mb-4">
                     Организации не найдены
                   </h3>
                   <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base text-justify">
@@ -36,7 +36,7 @@
                 <div class="flex items-center">
                   <button
                     @click="clearFiltersAndClose"
-                    class="flex-1 px-6 sm:px-8 py-2.5 sm:py-3 bg-[#A8E4A0] text-[#000000] hover:bg-[#98d490] transition-colors font-medium text-xs sm:text-base rounded-bl-lg"
+                    class="flex-1 px-6 sm:px-8 py-2.5 sm:py-3 bg-[#A8E4A0] text-black hover:bg-[#98d490] transition-colors font-medium text-xs sm:text-base rounded-bl-lg"
                   >
                     Сбросить фильтры
                   </button>
@@ -110,20 +110,18 @@ function clearFiltersAndClose() {
 </script>
 
 <style scoped>
-/* Фон как на фото: светлый + равномерная сетка чёрных точек; границы чёрные */
+/* Однотонный фон; только верхняя граница (без боков и снизу) */
 .filters-map-layer {
   min-height: 100%;
-  background-color: #fafaf8;
-  background-image: radial-gradient(circle, #000 1px, transparent 1px);
-  background-size: 20px 20px;
-  border: 4px solid #000;
+  background-color: #ffffff;
+  border: none;
+  border-top: 4px solid #212121;
 }
 
 .dark .filters-map-layer {
   background-color: #1a1a1a;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px);
-  background-size: 20px 20px;
-  border-color: #000;
+  border: none;
+  border-top: 4px solid #212121;
 }
 
 .filters-map-layer-inner {
@@ -132,13 +130,13 @@ function clearFiltersAndClose() {
 
 /* Чёрные границы у блоков фильтров */
 .filters-column :deep(> div) {
-  border: 3px solid #000 !important;
+  border: 3px solid #212121 !important;
   border-radius: 0.5rem;
 }
 
 /* Чёрные границы у карты */
 .map-column :deep(> div) {
-  border: 3px solid #000 !important;
+  border: 3px solid #212121 !important;
   border-right-width: 3px !important;
 }
 

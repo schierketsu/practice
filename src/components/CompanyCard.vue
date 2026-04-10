@@ -19,7 +19,7 @@
           </div>
         </div>
         <div class="flex-1 flex flex-col justify-center min-h-12 sm:min-h-16">
-          <h3 class="text-xl sm:text-2xl md:text-3xl font-extrabold mb-0.5 leading-tight text-[#000000] dark:text-white">{{ company.name }}</h3>
+          <h3 class="text-xl sm:text-2xl md:text-3xl font-extrabold mb-0.5 leading-tight text-black dark:text-white">{{ company.name }}</h3>
           <p class="text-sm sm:text-base text-gray-500 dark:text-white leading-tight">
             {{ company.sector }}
           </p>
@@ -95,11 +95,11 @@ function getTechStyle(tech) {
   const isSelected = selectedTechnologies.value.includes(tech)
   
   if (!isSelected) {
-    return 'background-color: #F3F4F6; color: #000000'
+    return 'background-color: #F3F4F6; color: #212121'
   }
   
   if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
-    return 'background-color: #A8E4A0; color: #000000'
+    return 'background-color: #A8E4A0; color: #212121'
   }
   
   return 'background-color: #1D4ED8; color: #ffffff'

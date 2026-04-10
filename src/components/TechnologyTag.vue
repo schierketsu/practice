@@ -28,11 +28,11 @@ const otherTechs = ['Битрикс', '1C CRM']
 
 function getTechStyle() {
   if (!props.isSelected) {
-    return 'background-color: #F3F4F6; color: #000000'
+    return 'background-color: #F3F4F6; color: #212121'
   }
   
   if (backendTechs.includes(props.technology) || otherTechs.includes(props.technology)) {
-    return 'background-color: #A8E4A0; color: #000000'
+    return 'background-color: #A8E4A0; color: #212121'
   }
   
   return 'background-color: #1D4ED8; color: #ffffff'
