@@ -1,0 +1,138 @@
+import { z } from 'zod'
+
+const EMAIL_MAX = 320
+const emailRegex =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+
+export const registerSchema = z
+  .object({
+    email: z
+      .string()
+      .trim()
+      .min(1, 'Укажите email')
+      .max(EMAIL_MAX, 'Email слишком длинный')
+      .regex(emailRegex, 'Некорректный формат email')
+      .transform((s) => s.toLowerCase()),
+    password: z.string(),
+    passwordConfirm: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    const pwd = data.password.trim()
+    if (pwd.length < 12) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Пароль не короче 12 символов',
+        path: ['password'],
+      })
+    }
+    if (/\s/.test(data.password) && data.password !== data.password.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Уберите пробелы в начале и в конце пароля',
+        path: ['password'],
+      })
+    }
+    if (!/[a-zа-яё]/.test(pwd)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Нужна хотя бы одна строчная буква',
+        path: ['password'],
+      })
+    }
+    if (!/[A-ZА-ЯЁ]/.test(pwd)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Нужна хотя бы одна заглавная буква',
+        path: ['password'],
+      })
+    }
+    if (!/\d/.test(pwd)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Нужна хотя бы одна цифра',
+        path: ['password'],
+      })
+    }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(pwd)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Нужен хотя бы один спецсимвол',
+        path: ['password'],
+      })
+    }
+    const local = data.email.split('@')[0] ?? ''
+    if (local.length >= 3 && pwd.toLowerCase().includes(local.toLowerCase())) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Пароль не должен содержать локальную часть email',
+        path: ['password'],
+      })
+    }
+    if (data.passwordConfirm.trim() !== pwd) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Пароли не совпадают',
+        path: ['passwordConfirm'],
+      })
+    }
+  })
+
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1)
+    .transform((s) => s.toLowerCase()),
+  password: z.string().min(1),
+})
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1),
+    password: z.string(),
+    passwordConfirm: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    const pwd = data.password.trim()
+    if (pwd.length < 12) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Пароль не короче 12 символов', path: ['password'] })
+    }
+    if (!/[a-zа-яё]/.test(pwd)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Нужна строчная буква', path: ['password'] })
+    }
+    if (!/[A-ZА-ЯЁ]/.test(pwd)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Нужна заглавная буква', path: ['password'] })
+    }
+    if (!/\d/.test(pwd)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Нужна цифра', path: ['password'] })
+    }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(pwd)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Нужен спецсимвол', path: ['password'] })
+    }
+    if (data.passwordConfirm.trim() !== pwd) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Пароли не совпадают', path: ['passwordConfirm'] })
+    }
+  })
+
+export const createReviewSchema = z.object({
+  text: z.string().trim().min(10, 'Минимум 10 символов').max(5000),
+  rating: z.coerce.number().int().min(1).max(5),
+  employment: z.string().trim().min(1).max(200),
+  location: z.string().trim().min(1).max(200),
+  periodLabel: z.string().trim().max(100).optional(),
+  authorDisplay: z.string().trim().min(1).max(120).optional(),
+})
+
+export const companyWriteSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  logo: z.string().trim().max(500),
+  description: z.string().trim().min(1).max(20000),
+  technologies: z.array(z.string().trim().min(1).max(80)).min(1),
+  sector: z.string().trim().min(1).max(200),
+  contacts: z.string().trim().min(1).max(500),
+  city: z.string().trim().min(1).max(200),
+  university: z.string().trim().min(1).max(300),
+  faculty: z.string().trim().min(1).max(300),
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+})

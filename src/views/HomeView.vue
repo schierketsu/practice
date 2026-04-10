@@ -1,5 +1,5 @@
 <template>
-  <div class="filters-map-layer">
+  <div class="filters-map-layer bg-[#F9FAFB] dark:bg-[#1a1a1a]">
     <div class="filters-map-layer-inner max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 w-full pb-4 sm:pb-8">
       <div class="relative">
         <div v-if="store.companies.length === 0" class="flex items-center justify-center min-h-[400px] sm:min-h-[500px]">
@@ -69,9 +69,9 @@ import FilterBar from '../components/FilterBar.vue'
 const store = useCompaniesStore()
 const showNoResultsModal = ref(false)
 
-onMounted(() => {
-  if (store.companies.length === 0) {
-    console.error('Companies store is empty')
+onMounted(async () => {
+  if (!store.loaded) {
+    await store.fetchCompanies()
   }
 })
 
@@ -110,18 +110,9 @@ function clearFiltersAndClose() {
 </script>
 
 <style scoped>
-/* Однотонный фон; только верхняя граница (без боков и снизу) */
+/* Высота слоя; фон как у шапки (#F9FAFB) — задан классами на корне */
 .filters-map-layer {
   min-height: 100%;
-  background-color: #ffffff;
-  border: none;
-  border-top: 4px solid #212121;
-}
-
-.dark .filters-map-layer {
-  background-color: #1a1a1a;
-  border: none;
-  border-top: 4px solid #212121;
 }
 
 .filters-map-layer-inner {

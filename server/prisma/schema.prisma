@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  role            Role      @default(USER)
+  blocked         Boolean   @default(false)
+  emailVerifiedAt DateTime?
+  createdAt       DateTime  @default(now())
+  reviews         Review[]
+}
+
+model Company {
+  id           Int      @id @default(autoincrement())
+  name         String
+  logo         String
+  description  String
+  technologies Json
+  sector       String
+  contacts     String
+  city         String
+  university   String
+  faculty      String
+  lat          Float
+  lng          Float
+  reviews      Review[]
+}
+
+model Review {
+  id            Int          @id @default(autoincrement())
+  companyId     Int
+  company       Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  authorDisplay String
+  text          String
+  rating        Int
+  employment    String
+  location      String
+  periodLabel   String?
+  status        ReviewStatus @default(PENDING)
+  createdAt     DateTime     @default(now())
+}

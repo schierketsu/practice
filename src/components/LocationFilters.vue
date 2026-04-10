@@ -12,13 +12,13 @@
       <button
         @click="clearFilters"
         :disabled="!hasActiveFilters"
-        class="px-2 py-1.5 sm:px-4 sm:py-2 bg-[#1D4ED8] hover:bg-[#164bc2] transition-colors font-medium text-xs sm:text-base flex items-center justify-center absolute top-0 right-0 rounded-bl-lg"
+        class="absolute top-0 right-0 box-border flex size-9 shrink-0 items-center justify-center rounded-bl-lg border-0 border-b-[3px] border-l-[3px] border-solid border-[#212121] bg-[#1D4ED8] p-0 transition-colors hover:bg-[#164bc2] sm:size-10"
         :style="!hasActiveFilters ? 'visibility: hidden' : ''"
       >
         <img
           src="/sbros2.png"
           alt="Сбросить фильтры"
-          class="h-4 w-auto sm:h-5"
+          class="h-5 w-5 object-contain sm:h-6 sm:w-6"
         />
       </button>
     </div>

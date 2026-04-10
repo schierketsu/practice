@@ -1,6 +1,9 @@
 <template>
   <div class="py-4 sm:py-8">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+    <div v-if="pageLoading" class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 text-center py-16 text-gray-500">
+      Загрузка…
+    </div>
+    <div v-else class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8">
     <div v-if="company" class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg overflow-hidden relative">
       <div class="absolute top-0 left-0 w-24 h-24 sm:w-40 sm:h-40 rounded-r-lg rounded-br-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0 z-10">
         <img
@@ -137,14 +140,72 @@
 
     <!-- Окно с отзывами: точки снаружи, на всю ширину как слой с фильтрами и картой -->
     <div v-if="company" class="reviews-dots-wrap mt-8 sm:mt-10 w-full">
-      <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8">
       <div class="reviews-layer rounded-lg overflow-hidden">
       <div class="pt-4 pr-4 pb-4 sm:pt-6 sm:pr-6 sm:pb-6 lg:pt-8 lg:pr-8 lg:pb-8 pl-4 sm:pl-6 lg:pl-8">
         <h2 class="about-company-heading">ОТКЛИКИ</h2>
+        <div v-if="reviewsLoading" class="text-gray-500 text-sm py-4">Загрузка откликов…</div>
+        <div v-else class="mb-6 p-4 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-600 rounded-lg">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Оставить отклик</h3>
+          <p v-if="!auth.isAuthenticated" class="text-sm text-gray-600 dark:text-gray-400">
+            <router-link :to="{ path: '/вход', query: { redirect: $route.fullPath } }" class="text-[#1D4ED8] underline">
+              Войдите
+            </router-link>
+            , чтобы отправить отклик (после модерации он появится в списке).
+          </p>
+          <form v-else class="flex flex-col gap-2 text-sm" @submit.prevent="submitReview">
+            <textarea
+              v-model="reviewForm.text"
+              required
+              rows="3"
+              placeholder="Текст отклика (от 10 символов)"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white"
+            />
+            <div class="flex flex-wrap gap-2 items-center">
+              <label class="flex items-center gap-1">
+                Оценка
+                <select v-model.number="reviewForm.rating" class="border rounded px-2 py-1 dark:bg-[#2a2a2a]">
+                  <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
+                </select>
+              </label>
+            </div>
+            <input
+              v-model="reviewForm.employment"
+              required
+              placeholder="Трудоустройство (как в примерах ниже)"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 dark:bg-[#2a2a2a]"
+            />
+            <input
+              v-model="reviewForm.location"
+              required
+              placeholder="Локация практики"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 dark:bg-[#2a2a2a]"
+            />
+            <input
+              v-model="reviewForm.periodLabel"
+              placeholder="Период (например: лето 2025)"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 dark:bg-[#2a2a2a]"
+            />
+            <input
+              v-model="reviewForm.authorDisplay"
+              placeholder="Как отображать имя (необязательно)"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 dark:bg-[#2a2a2a]"
+            />
+            <p v-if="reviewFormError" class="text-red-600 text-sm">{{ reviewFormError }}</p>
+            <p v-if="reviewFormSuccess" class="text-green-700 text-sm">{{ reviewFormSuccess }}</p>
+            <button
+              type="submit"
+              :disabled="reviewSubmitting"
+              class="self-start px-4 py-2 bg-[#1D4ED8] text-white rounded-lg disabled:opacity-50"
+            >
+              {{ reviewSubmitting ? 'Отправка…' : 'Отправить на модерацию' }}
+            </button>
+          </form>
+        </div>
         <div class="space-y-4 sm:space-y-6">
           <div
-            v-for="(review, index) in reviews"
-            :key="index"
+            v-for="review in reviews"
+            :key="review.id"
             class="p-4 sm:p-6 bg-gray-50 dark:bg-[#2a2a2a] rounded-lg"
           >
             <div class="flex items-start gap-3 sm:gap-4 mb-3">
@@ -180,7 +241,7 @@
       </div>
     </div>
 
-    <div v-if="!company" class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 text-center py-12">
+    <div v-if="!pageLoading && !company" class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 text-center py-12">
       <p class="text-gray-500 dark:text-white text-lg">Компания не найдена</p>
       <button
         @click="$router.push('/практики')"
@@ -193,20 +254,106 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCompaniesStore } from '../stores/companies'
 import { useThemeStore } from '../stores/theme'
+import { useAuthStore } from '../stores/auth'
+import { apiFetch } from '../api/client'
 
 const route = useRoute()
 const store = useCompaniesStore()
 const themeStore = useThemeStore()
+const auth = useAuthStore()
 const imageError = ref(false)
 const currentImageIndex = ref(0)
+const pageLoading = ref(true)
+const reviews = ref([])
+const reviewsLoading = ref(false)
+const reviewFormError = ref('')
+const reviewFormSuccess = ref('')
+const reviewSubmitting = ref(false)
+
+const reviewForm = reactive({
+  text: '',
+  rating: 5,
+  employment: '',
+  location: '',
+  periodLabel: '',
+  authorDisplay: '',
+})
 
 const isDark = computed(() => themeStore.isDark)
 
 const company = computed(() => store.getCompanyById(route.params.id))
+
+async function loadReviews() {
+  const id = route.params.id
+  if (!id) return
+  reviewsLoading.value = true
+  try {
+    const data = await apiFetch(`/api/companies/${id}/reviews`, { skipAuth: true })
+    reviews.value = (data.reviews || []).map((r) => ({
+      ...r,
+      id: r.id,
+    }))
+  } catch {
+    reviews.value = []
+  } finally {
+    reviewsLoading.value = false
+  }
+}
+
+async function ensureCompany() {
+  pageLoading.value = true
+  if (!store.loaded) {
+    await store.fetchCompanies()
+  }
+  pageLoading.value = false
+  await loadReviews()
+}
+
+onMounted(ensureCompany)
+
+watch(
+  () => route.params.id,
+  () => {
+    ensureCompany()
+    reviewFormSuccess.value = ''
+    reviewFormError.value = ''
+  }
+)
+
+async function submitReview() {
+  reviewFormError.value = ''
+  reviewFormSuccess.value = ''
+  const id = route.params.id
+  reviewSubmitting.value = true
+  try {
+    await apiFetch(`/api/companies/${id}/reviews`, {
+      method: 'POST',
+      body: {
+        text: reviewForm.text.trim(),
+        rating: reviewForm.rating,
+        employment: reviewForm.employment.trim(),
+        location: reviewForm.location.trim(),
+        periodLabel: reviewForm.periodLabel.trim() || undefined,
+        authorDisplay: reviewForm.authorDisplay.trim() || undefined,
+      },
+      token: auth.token,
+    })
+    reviewFormSuccess.value = 'Отклик отправлен и ожидает модерации.'
+    reviewForm.text = ''
+    reviewForm.employment = ''
+    reviewForm.location = ''
+    reviewForm.periodLabel = ''
+    reviewForm.authorDisplay = ''
+  } catch (e) {
+    reviewFormError.value = e.message || 'Не удалось отправить'
+  } finally {
+    reviewSubmitting.value = false
+  }
+}
 
 // Сброс индекса карусели при смене компании
 watch(() => company.value?.id, () => {
@@ -239,89 +386,6 @@ function handleCarouselImageError(event) {
   // Заменяем на заглушку при ошибке загрузки
   event.target.src = '/bokus.jpg'
 }
-
-// Примерные отзывы (в реальном приложении это должно приходить из store или API)
-const reviews = computed(() => {
-  if (!company.value) return []
-  
-  // Примерные отзывы для разных компаний
-  const reviewsMap = {
-    1: [
-      {
-        author: 'Алексей Петров',
-        date: 'лето 2025',
-        text: 'Отличная практика! Научился работать с Vue и PHP на реальных проектах. Команда очень дружелюбная, всегда помогут разобраться. Рекомендую!',
-        rating: 5,
-        employment: 'Трудоустройство не предложили',
-        location: 'Проходил удаленно'
-      },
-      {
-        author: 'Мария Иванова',
-        date: 'зима 2026',
-        text: 'Практика превзошла все ожидания. Получил много практического опыта, работал над интересными задачами. Особенно понравилось работать с Flutter.',
-        rating: 4,
-        employment: 'Трудоустройство предложили',
-        location: 'Проходил в офисе'
-      }
-    ],
-    2: [
-      {
-        author: 'Дмитрий Сидоров',
-        date: 'осень 2025',
-        text: 'Интересная практика по микроконтроллерам. Узнал много нового про C++ и Python. Работа с железом - это совсем другой уровень программирования!',
-        rating: 5,
-        employment: 'Трудоустройство не предложили',
-        location: 'Проходил в офисе'
-      },
-      {
-        author: 'Елена Козлова',
-        date: 'весна 2026',
-        text: 'Отличный опыт работы с FastAPI. Команда профессионалов, всегда готовы помочь. Получил ценные знания, которые пригодятся в будущем.',
-        rating: 4,
-        employment: 'Трудоустройство предложили',
-        location: 'Проходил удаленно'
-      }
-    ],
-    3: [
-      {
-        author: 'Иван Смирнов',
-        date: 'лето 2025',
-        text: 'Практика в F5 - это отличная возможность поработать с enterprise-технологиями. Laravel, Kotlin, Flutter - все на реальных проектах. Очень доволен!',
-        rating: 5,
-        employment: 'Трудоустройство не предложили',
-        location: 'Проходил удаленно'
-      },
-      {
-        author: 'Анна Волкова',
-        date: 'зима 2026',
-        text: 'Отличная команда и интересные задачи. Научилась работать с 1C CRM и мобильной разработкой. Практика дала много практических навыков.',
-        rating: 4,
-        employment: 'Трудоустройство предложили',
-        location: 'Проходил в офисе'
-      }
-    ],
-    4: [
-      {
-        author: 'Сергей Новиков',
-        date: 'осень 2025',
-        text: 'Практика по информационной безопасности очень интересная. Работал с React, Python и C#. Узнал много про безопасность данных и защиту систем.',
-        rating: 5,
-        employment: 'Трудоустройство не предложили',
-        location: 'Проходил в офисе'
-      },
-      {
-        author: 'Ольга Морозова',
-        date: 'весна 2026',
-        text: 'Отличный опыт! Команда профессионалов, интересные проекты. Особенно понравилось работать с Entity Framework и базами данных.',
-        rating: 4,
-        employment: 'Трудоустройство предложили',
-        location: 'Проходил удаленно'
-      }
-    ]
-  }
-  
-  return reviewsMap[company.value.id] || []
-})
 
 const parsedContacts = computed(() => {
   if (!company.value) return { email: null, phone: null }
