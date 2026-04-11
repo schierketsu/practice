@@ -30,8 +30,12 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const data = await apiFetch('/api/auth/me', { token: token.value })
       user.value = data.user
-    } catch {
-      setSession('', null)
+    } catch (e) {
+      // Только недействительный токен / нет пользователя — сбрасываем сессию.
+      // Сеть, 5xx, таймаут: не трогаем localStorage (часто при F5, если API ещё не поднялся).
+      if (e?.status === 401) {
+        setSession('', null)
+      }
     }
   }
 

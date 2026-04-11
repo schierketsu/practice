@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { prisma } from '../lib/prisma.js'
+import { findCompanyByRouteSegment } from '../lib/companyRoute.js'
 import { mapCompany } from '../lib/mapCompany.js'
 import { createReviewSchema } from '../lib/validation.js'
 import { ReviewStatus } from '@prisma/client'
@@ -35,10 +36,9 @@ router.get('/', async (_req, res) => {
 })
 
 router.get('/:id/reviews', async (req, res) => {
-  const id = parseInt(String(req.params.id), 10)
-  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' })
-  const company = await prisma.company.findUnique({ where: { id } })
+  const company = await findCompanyByRouteSegment(String(req.params.id))
   if (!company) return res.status(404).json({ error: 'Компания не найдена' })
+  const id = company.id
   const reviews = await prisma.review.findMany({
     where: { companyId: id, status: ReviewStatus.APPROVED },
     orderBy: { createdAt: 'desc' },
@@ -48,10 +48,9 @@ router.get('/:id/reviews', async (req, res) => {
 
 /** Статус отклика текущего пользователя по компании (для UI формы) */
 router.get('/:id/my-review', requireAuth, async (req: AuthedRequest, res) => {
-  const id = parseInt(String(req.params.id), 10)
-  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' })
-  const company = await prisma.company.findUnique({ where: { id } })
+  const company = await findCompanyByRouteSegment(String(req.params.id))
   if (!company) return res.status(404).json({ error: 'Компания не найдена' })
+  const id = company.id
   const r = await prisma.review.findFirst({
     where: { companyId: id, userId: req.user!.id },
     orderBy: { createdAt: 'desc' },
@@ -63,10 +62,9 @@ router.get('/:id/my-review', requireAuth, async (req: AuthedRequest, res) => {
 
 /** Удалить свои отклики по компании (чтобы отправить новый на модерацию) */
 router.delete('/:id/my-review', requireAuth, async (req: AuthedRequest, res) => {
-  const id = parseInt(String(req.params.id), 10)
-  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' })
-  const company = await prisma.company.findUnique({ where: { id } })
+  const company = await findCompanyByRouteSegment(String(req.params.id))
   if (!company) return res.status(404).json({ error: 'Компания не найдена' })
+  const id = company.id
   const result = await prisma.review.deleteMany({
     where: { companyId: id, userId: req.user!.id },
   })
@@ -75,18 +73,15 @@ router.delete('/:id/my-review', requireAuth, async (req: AuthedRequest, res) => 
 })
 
 router.get('/:id', async (req, res) => {
-  const id = parseInt(String(req.params.id), 10)
-  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' })
-  const c = await prisma.company.findUnique({ where: { id } })
+  const c = await findCompanyByRouteSegment(String(req.params.id))
   if (!c) return res.status(404).json({ error: 'Компания не найдена' })
   return res.json({ company: mapCompany(c) })
 })
 
 router.post('/:id/reviews', requireAuth, async (req: AuthedRequest, res) => {
-  const id = parseInt(String(req.params.id), 10)
-  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' })
-  const company = await prisma.company.findUnique({ where: { id } })
+  const company = await findCompanyByRouteSegment(String(req.params.id))
   if (!company) return res.status(404).json({ error: 'Компания не найдена' })
+  const id = company.id
   const parsed = createReviewSchema.safeParse(req.body)
   if (!parsed.success) {
     return res.status(400).json({ error: 'Ошибка валидации', details: parsed.error.flatten() })

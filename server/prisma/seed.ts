@@ -6,6 +6,7 @@ const prisma = new PrismaClient()
 
 const companies = [
   {
+    slug: 'bokus',
     name: 'БОКУС',
     logo: '/bokus.jpg',
     description:
@@ -20,6 +21,7 @@ const companies = [
     lng: 47.195723,
   },
   {
+    slug: 'ekra',
     name: 'ЭКРА',
     logo: '/ekra.jpg',
     description:
@@ -34,6 +36,7 @@ const companies = [
     lng: 47.257424,
   },
   {
+    slug: 'f5',
     name: 'F5',
     logo: '/f5.jpg',
     description:
@@ -48,6 +51,7 @@ const companies = [
     lng: 47.244015,
   },
   {
+    slug: 'keysystems',
     name: 'КЕЙСИСТЕМС',
     logo: '/keysystems.png',
     description:

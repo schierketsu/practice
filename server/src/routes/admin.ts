@@ -11,7 +11,7 @@ import {
   toUploadsUrl,
 } from '../lib/technologyCatalog.js'
 import { companyWriteSchema } from '../lib/validation.js'
-import { ReviewStatus, Role } from '@prisma/client'
+import { Prisma, ReviewStatus, Role } from '@prisma/client'
 import type { AuthedRequest } from '../middleware/auth.js'
 import { requireAuth, requireAdmin } from '../middleware/auth.js'
 import adminUniversitiesRoutes, {
@@ -41,6 +41,28 @@ const companyLogoStorage = multer.diskStorage({
 const uploadCompanyLogo = multer({
   storage: companyLogoStorage,
   limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (imageMime.has(file.mimetype)) cb(null, true)
+    else cb(new Error('Допустимы только изображения PNG, JPEG, WebP, GIF'))
+  },
+})
+
+const companyGalleryStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    const dir = path.join(UPLOAD_ROOT, 'company-gallery')
+    fs.mkdirSync(dir, { recursive: true })
+    cb(null, dir)
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase()
+    const safe = ['.png', '.jpg', '.jpeg', '.webp', '.gif'].includes(ext) ? ext : '.png'
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 9)}${safe}`)
+  },
+})
+
+const uploadCompanyGallery = multer({
+  storage: companyGalleryStorage,
+  limits: { fileSize: 3 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (imageMime.has(file.mimetype)) cb(null, true)
     else cb(new Error('Допустимы только изображения PNG, JPEG, WebP, GIF'))
@@ -100,6 +122,21 @@ router.post('/uploads/company-logo', (req, res, next) => {
   const f = req.file
   if (!f) return res.status(400).json({ error: 'Нет файла (поле file)' })
   const rel = path.join('companies', f.filename).replace(/\\/g, '/')
+  return res.json({ url: `/uploads/${rel}` })
+})
+
+router.post('/uploads/company-gallery', (req, res, next) => {
+  uploadCompanyGallery.single('file')(req, res, (err: unknown) => {
+    if (err) {
+      const msg = err instanceof Error ? err.message : 'Ошибка загрузки'
+      return res.status(400).json({ error: msg })
+    }
+    next()
+  })
+}, (req, res) => {
+  const f = req.file
+  if (!f) return res.status(400).json({ error: 'Нет файла (поле file)' })
+  const rel = path.join('company-gallery', f.filename).replace(/\\/g, '/')
   return res.json({ url: `/uploads/${rel}` })
 })
 
@@ -234,22 +271,32 @@ router.post('/companies', async (req, res) => {
   if (catalogErr) return res.status(400).json({ error: catalogErr })
   const techErr = await assertTechnologiesInCatalog(d.technologies)
   if (techErr) return res.status(400).json({ error: techErr })
-  const c = await prisma.company.create({
-    data: {
-      name: d.name,
-      logo: d.logo,
-      description: d.description,
-      technologies: d.technologies,
-      sector: d.sector,
-      contacts: d.contacts,
-      city: d.city,
-      universities: d.universities,
-      faculty: d.faculty,
-      lat: d.lat,
-      lng: d.lng,
-    },
-  })
-  return res.status(201).json({ company: mapCompany(c) })
+  try {
+    const c = await prisma.company.create({
+      data: {
+        slug: d.slug,
+        name: d.name,
+        logo: d.logo,
+        description: d.description,
+        technologies: d.technologies,
+        sector: d.sector,
+        contacts: d.contacts,
+        city: d.city,
+        universities: d.universities,
+        faculty: d.faculty,
+        lat: d.lat,
+        lng: d.lng,
+        galleryCount: d.galleryCount,
+        galleryImages: d.galleryImages,
+      },
+    })
+    return res.status(201).json({ company: mapCompany(c) })
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      return res.status(409).json({ error: 'Такой адрес страницы (slug) уже занят' })
+    }
+    throw e
+  }
 })
 
 router.put('/companies/:id', async (req, res) => {
@@ -268,6 +315,7 @@ router.put('/companies/:id', async (req, res) => {
     const c = await prisma.company.update({
       where: { id },
       data: {
+        slug: d.slug,
         name: d.name,
         logo: d.logo,
         description: d.description,
@@ -279,11 +327,19 @@ router.put('/companies/:id', async (req, res) => {
         faculty: d.faculty,
         lat: d.lat,
         lng: d.lng,
+        galleryCount: d.galleryCount,
+        galleryImages: d.galleryImages,
       },
     })
     return res.json({ company: mapCompany(c) })
-  } catch {
-    return res.status(404).json({ error: 'Компания не найдена' })
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      return res.status(409).json({ error: 'Такой адрес страницы (slug) уже занят' })
+    }
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+      return res.status(404).json({ error: 'Компания не найдена' })
+    }
+    throw e
   }
 })
 

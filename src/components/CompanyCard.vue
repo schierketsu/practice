@@ -55,7 +55,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCompaniesStore } from '../stores/companies'
+import { useCompaniesStore, companyPagePath } from '../stores/companies'
 
 const props = defineProps({
   company: {
@@ -81,7 +81,7 @@ const sortedTechnologies = computed(() => {
 })
 
 function goToDetail() {
-  router.push(`/компания/${props.company.id}`)
+  router.push(companyPagePath(props.company))
 }
 
 function handleImageError(event) {

@@ -37,6 +37,8 @@ model User {
 
 model Company {
   id           Int      @id @default(autoincrement())
+  /// Сегмент URL: /компания/{slug} (латиница, цифры, дефис; не только цифры)
+  slug         String   @unique
   name         String
   logo         String
   description  String
@@ -49,6 +51,10 @@ model Company {
   faculty      String
   lat          Float
   lng          Float
+  /// Сколько слайдов в карусели (1–10); незаполненные — серая заглушка
+  galleryCount Int @default(3)
+  /// JSON-массив URL фото (/uploads/...) по порядку
+  galleryImages Json @default("[]")
   reviews      Review[]
 }
 

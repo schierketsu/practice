@@ -26,7 +26,8 @@
             <div
               v-if="showNoResultsModal"
               class="modal-overlay absolute inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4"
-              @click.self="closeModal"
+              @pointerdown="onBackdropPointerDown"
+              @pointerup="onBackdropPointerUp"
             >
               <div class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-xl max-w-md w-full overflow-hidden relative">
                 <div class="px-6 sm:px-8 pt-6 sm:pt-8 pb-6 text-center">
@@ -65,6 +66,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useBackdropDismiss } from '../composables/useBackdropDismiss'
 import { useCompaniesStore } from '../stores/companies'
 import LocationFilters from '../components/LocationFilters.vue'
 import OrganizationMap from '../components/OrganizationMap.vue'
@@ -106,6 +108,8 @@ function clearFilters() {
 function closeModal() {
   showNoResultsModal.value = false
 }
+
+const { onBackdropPointerDown, onBackdropPointerUp } = useBackdropDismiss(closeModal)
 
 function clearFiltersAndClose() {
   store.setTechnologiesFilter([])

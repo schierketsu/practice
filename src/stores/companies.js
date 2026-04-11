@@ -2,6 +2,16 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiFetch } from '../api/client'
 
+/** Путь карточки компании: /компания/{slug} (fallback на id, если slug ещё нет) */
+export function companyPagePath(company) {
+  if (!company) return '/практики'
+  const seg =
+    company.slug != null && String(company.slug).trim() !== ''
+      ? String(company.slug).trim()
+      : company.id
+  return `/компания/${encodeURIComponent(String(seg))}`
+}
+
 /** Список вузов компании (новое поле universities или legacy university) */
 export function companyUniversitiesList(company) {
   const u = company?.universities
@@ -183,6 +193,20 @@ export const useCompaniesStore = defineStore('companies', () => {
     return companies.value.find((company) => company.id === parseInt(String(id), 10))
   }
 
+  /** Сегмент из URL: slug или числовой id (старые ссылки) */
+  function getCompanyByRouteSegment(segment) {
+    if (segment == null || segment === '') return undefined
+    const s = String(segment)
+    const list = companies.value
+    const bySlug = list.find((c) => c.slug === s)
+    if (bySlug) return bySlug
+    if (/^\d+$/.test(s)) {
+      const id = parseInt(s, 10)
+      return list.find((c) => c.id === id)
+    }
+    return undefined
+  }
+
   return {
     companies,
     loadError,
@@ -210,5 +234,6 @@ export const useCompaniesStore = defineStore('companies', () => {
     fetchTechnologyIcons,
     techIconUrlFor,
     getCompanyById,
+    getCompanyByRouteSegment,
   }
 })

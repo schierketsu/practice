@@ -52,7 +52,7 @@
         </div>
 
         <div class="p-4">
-          <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Факультеты</h4>
+          <p class="text-sm text-gray-400 mb-2">Факультеты</p>
           <ul v-if="u.faculties?.length" class="space-y-2 mb-4">
             <li
               v-for="f in u.faculties"

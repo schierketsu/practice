@@ -99,12 +99,13 @@
             :style="{ transform: `translateX(-${currentImageIndex * 100}%)` }"
           >
             <div
-              v-for="(image, index) in companyImages"
+              v-for="(slide, index) in companySlides"
               :key="index"
-              class="min-w-full h-64 sm:h-80 lg:h-96 flex-shrink-0"
+              class="min-w-full h-64 sm:h-80 lg:h-96 flex-shrink-0 bg-gray-200 dark:bg-gray-700"
             >
               <img
-                :src="image"
+                v-if="slide.src"
+                :src="slide.src"
                 :alt="`${company.name} - фото ${index + 1}`"
                 class="w-full h-full object-cover"
                 @error="handleCarouselImageError"
@@ -114,7 +115,7 @@
           
           <!-- Навигационные стрелки -->
           <button
-            v-if="companyImages.length > 1"
+            v-if="companySlides.length > 1"
             @click="previousImage"
             class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
             aria-label="Предыдущее фото"
@@ -122,7 +123,7 @@
             <img src="/arrowleft.png" alt="←" class="w-4 h-4 brightness-0 invert" />
           </button>
           <button
-            v-if="companyImages.length > 1"
+            v-if="companySlides.length > 1"
             @click="nextImage"
             class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
             aria-label="Следующее фото"
@@ -132,11 +133,11 @@
           
           <!-- Индикаторы точек -->
           <div
-            v-if="companyImages.length > 1"
+            v-if="companySlides.length > 1"
             class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10"
           >
             <button
-              v-for="(image, index) in companyImages"
+              v-for="(slide, index) in companySlides"
               :key="index"
               @click="currentImageIndex = index"
               class="w-2 h-2 rounded-full transition-all"
@@ -225,13 +226,36 @@
               class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white"
             />
             <div>
-              <label class="block font-medium text-gray-800 dark:text-gray-200 mb-1">Оценка</label>
-              <select
-                v-model.number="reviewForm.rating"
-                class="w-full max-w-[12rem] border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white"
+              <span id="review-rating-label" class="block font-medium text-gray-800 dark:text-gray-200 mb-1">Оценка</span>
+              <div
+                role="radiogroup"
+                aria-labelledby="review-rating-label"
+                class="flex items-center gap-1 sm:gap-1.5"
+                @mouseleave="ratingHover = null"
               >
-                <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
-              </select>
+                <button
+                  v-for="n in 5"
+                  :key="n"
+                  type="button"
+                  class="p-0.5 rounded transition-opacity hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1D4ED8] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#2a2a2a]"
+                  :aria-label="`Оценка ${n} из 5`"
+                  :aria-checked="reviewForm.rating === n"
+                  role="radio"
+                  @click="reviewForm.rating = n"
+                  @mouseenter="ratingHover = n"
+                  @focus="ratingHover = n"
+                  @blur="ratingHover = null"
+                >
+                  <img
+                    :src="n <= (ratingHover != null ? ratingHover : reviewForm.rating) ? '/сердце3д.png' : '/сердце3дсерое.png'"
+                    alt=""
+                    class="w-8 h-8 sm:w-9 sm:h-9 object-contain block pointer-events-none select-none"
+                    width="36"
+                    height="36"
+                    draggable="false"
+                  />
+                </button>
+              </div>
             </div>
             <div>
               <label class="block font-medium text-gray-800 dark:text-gray-200 mb-1">Трудоустройство после практики</label>
@@ -355,13 +379,15 @@ const reviewsLoading = ref(false)
 const reviewFormError = ref('')
 const reviewSubmitting = ref(false)
 const reviewDeleting = ref(false)
+/** Подсветка сердец при наведении (1–5); null — только выбранная оценка */
+const ratingHover = ref(null)
 /** null | PENDING | APPROVED | REJECTED — с сервера, сохраняется между визитами */
 const myReviewStatus = ref(null)
 const myReviewLoading = ref(false)
 
 const reviewForm = reactive({
   text: '',
-  rating: 5,
+  rating: 0,
   employment: '',
   location: '',
   periodLabel: '',
@@ -369,12 +395,13 @@ const reviewForm = reactive({
 
 const isDark = computed(() => themeStore.isDark)
 
-const company = computed(() => store.getCompanyById(route.params.id))
+const company = computed(() => store.getCompanyByRouteSegment(route.params.id))
 
 watch(
   () => company.value?.id,
   () => {
     techIconBroken.value = new Set()
+    ratingHover.value = null
   },
 )
 
@@ -467,6 +494,10 @@ async function deleteMyReview() {
 
 async function submitReview() {
   reviewFormError.value = ''
+  if (!reviewForm.rating || reviewForm.rating < 1 || reviewForm.rating > 5) {
+    reviewFormError.value = 'Выберите оценку'
+    return
+  }
   const id = route.params.id
   reviewSubmitting.value = true
   try {
@@ -483,9 +514,11 @@ async function submitReview() {
     })
     myReviewStatus.value = 'PENDING'
     reviewForm.text = ''
+    reviewForm.rating = 0
     reviewForm.employment = ''
     reviewForm.location = ''
     reviewForm.periodLabel = ''
+    ratingHover.value = null
   } catch (e) {
     reviewFormError.value = e.message || 'Не удалось отправить'
   } finally {
@@ -498,14 +531,19 @@ watch(() => company.value?.id, () => {
   currentImageIndex.value = 0
 })
 
-// Фотографии для карусели — по умолчанию 3 слайда с back3.png
-const companyImages = computed(() => {
-  if (!company.value) return []
-  return ['/backk.png', '/backk.png', '/backk.png']
+/** Слайды карусели: galleryCount штук; без URL — только серая подложка (класс на контейнере) */
+const companySlides = computed(() => {
+  const c = company.value
+  if (!c) return []
+  const count = Math.min(10, Math.max(1, Number(c.galleryCount) || 3))
+  const imgs = Array.isArray(c.galleryImages) ? c.galleryImages.filter((u) => typeof u === 'string' && u.trim()) : []
+  return Array.from({ length: count }, (_, i) => ({
+    src: imgs[i]?.trim() || null,
+  }))
 })
 
 function nextImage() {
-  if (currentImageIndex.value < companyImages.value.length - 1) {
+  if (currentImageIndex.value < companySlides.value.length - 1) {
     currentImageIndex.value++
   } else {
     currentImageIndex.value = 0
@@ -516,7 +554,7 @@ function previousImage() {
   if (currentImageIndex.value > 0) {
     currentImageIndex.value--
   } else {
-    currentImageIndex.value = companyImages.value.length - 1
+    currentImageIndex.value = companySlides.value.length - 1
   }
 }
 

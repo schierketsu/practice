@@ -8,7 +8,8 @@
       aria-modal="true"
       aria-labelledby="login-modal-title"
       tabindex="-1"
-      @click.self="close"
+      @pointerdown="onBackdropPointerDown"
+      @pointerup="onBackdropPointerUp"
       @keyup.escape="close"
     >
       <div
@@ -67,6 +68,7 @@
 
 <script setup>
 import { ref, reactive, watch, nextTick } from 'vue'
+import { useBackdropDismiss } from '../composables/useBackdropDismiss'
 import { useAuthStore } from '../stores/auth'
 import { loginFormSchema } from '../validation/authSchema'
 
@@ -95,6 +97,8 @@ function resetForm() {
 function close() {
   emit('update:modelValue', false)
 }
+
+const { onBackdropPointerDown, onBackdropPointerUp } = useBackdropDismiss(close)
 
 watch(
   () => props.modelValue,

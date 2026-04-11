@@ -71,7 +71,7 @@
               type="button"
               class="flex w-[52px] flex-shrink-0 items-center justify-center rounded-r-2xl border-l border-gray-200 bg-[#1D4ED8] text-white transition-colors active:bg-[#164bc2] dark:border-[#2a2a2a]"
               aria-label="Открыть страницу компании"
-              @click="goToCompany(selectedMobileCompany.id)"
+              @click="goToCompany(selectedMobileCompany)"
             >
               <img src="/arrowright2.png" alt="" class="h-5 w-5 max-h-5 max-w-5" />
             </button>
@@ -177,8 +177,10 @@ function onSheetLogoError() {
   sheetLogoError.value = true
 }
 
-function goToCompany(id) {
-  router.push(`/компания/${id}`)
+function goToCompany(company) {
+  if (!company) return
+  const seg = company.slug != null && String(company.slug).trim() !== '' ? company.slug : company.id
+  router.push(`/компания/${encodeURIComponent(String(seg))}`)
 }
 
 watch(selectedMobileCompany, () => {
@@ -216,6 +218,11 @@ function getPopupSizing(name) {
 }
 
 function createPopupContent(company) {
+  const linkSeg =
+    company.slug != null && String(company.slug).trim() !== ''
+      ? String(company.slug).trim()
+      : company.id
+  const companyPathEncoded = encodeURIComponent(String(linkSeg))
   /** Попап только на sm+; на мобильных карточка внизу слоя */
   const narrow = false
   const maxW = getPopupSizing(company.name)
@@ -277,8 +284,8 @@ function createPopupContent(company) {
         </div>
       </div>
       <button
-        onclick="window.location.href='/компания/${company.id}'"
-        style="position: absolute; top: 0; right: -1px; bottom: 0; width: ${btnW}px; padding-left: 8px; padding-right: 8px; background-color: #1D4ED8; color: #ffffff; border: none; border-radius: 0 12px 12px 0; font-weight: 700; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; z-index: 10; margin: 0;"
+        onclick="window.location.href='/компания/${companyPathEncoded}'"
+        style="position: absolute; top: 0; right: 0; bottom: 0; width: ${btnW}px; padding-left: 8px; padding-right: 8px; background-color: #1D4ED8; color: #ffffff; border: none; border-radius: 0 12px 12px 0; font-weight: 700; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; z-index: 10; margin: 0;"
         onmouseover="this.style.backgroundColor='#164bc2'"
         onmouseout="this.style.backgroundColor='#1D4ED8'"
       >
@@ -567,6 +574,7 @@ onUnmounted(() => {
 :deep(.maptiler-popup-content) {
   padding: 0;
   margin: 0;
+  background: transparent !important;
 }
 :deep(.maplibregl-popup-content-wrapper),
 :deep(.maptiler-popup-content-wrapper) {
@@ -574,6 +582,16 @@ onUnmounted(() => {
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(33, 33, 33, 0.15);
   overflow: hidden;
+  /* Совпадает с фоном карточки — иначе в углах (особенно справа у синей кнопки) просвечивает белый дефолт SDK */
+  background-color: #ffffff !important;
+}
+:deep(.maplibregl-popup.dark-popup .maplibregl-popup-content-wrapper),
+:deep(.maptiler-popup.dark-popup .maptiler-popup-content-wrapper) {
+  background-color: #1a1a1a !important;
+}
+:deep(.maplibregl-popup.light-popup .maplibregl-popup-content-wrapper),
+:deep(.maptiler-popup.light-popup .maptiler-popup-content-wrapper) {
+  background-color: #ffffff !important;
 }
 .dark :deep(.maplibregl-popup-content-wrapper),
 .dark :deep(.maptiler-popup-content-wrapper) {

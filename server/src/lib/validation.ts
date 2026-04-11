@@ -94,7 +94,21 @@ export const updateProfileSchema = z.object({
   lastName: z.string().trim().max(120),
 })
 
+const companySlugSchema = z
+  .string()
+  .trim()
+  .min(2, 'Минимум 2 символа')
+  .max(80)
+  .regex(/^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/, {
+    message: 'Только латиница, цифры и дефисы между блоками, без пробелов',
+  })
+  .refine((s) => !/^\d+$/.test(s), {
+    message: 'Адрес не может состоять только из цифр (как у старого id)',
+  })
+  .transform((s) => s.toLowerCase())
+
 export const companyWriteSchema = z.object({
+  slug: companySlugSchema,
   name: z.string().trim().min(1).max(200),
   logo: z.string().trim().min(1).max(800),
   description: z.string().trim().min(1).max(20000),
@@ -106,4 +120,6 @@ export const companyWriteSchema = z.object({
   faculty: z.string().trim().min(1).max(300),
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180),
+  galleryCount: z.coerce.number().int().min(1).max(10).optional().default(3),
+  galleryImages: z.array(z.string().trim().min(1).max(800)).max(20).optional().default([]),
 })

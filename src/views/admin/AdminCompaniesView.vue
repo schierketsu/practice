@@ -15,14 +15,24 @@
           <tr>
             <th class="text-left p-3 font-semibold">ID</th>
             <th class="text-left p-3 font-semibold">Название</th>
+            <th class="text-left p-3 font-semibold">Страница</th>
             <th class="text-left p-3 font-semibold">Город</th>
             <th class="text-left p-3 font-semibold"></th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="c in companies" :key="c.id" class="border-b border-gray-100">
-            <td class="p-3">{{ c.id }}</td>
+            <td class="p-3">
+              <router-link
+                :to="companyPagePath(c)"
+                class="text-[#1D4ED8] dark:text-blue-400 hover:underline font-mono tabular-nums"
+                title="Открыть страницу компании"
+              >
+                {{ c.id }}
+              </router-link>
+            </td>
             <td class="p-3">{{ c.name }}</td>
+            <td class="p-3 font-mono text-xs">/компания/{{ c.slug }}</td>
             <td class="p-3">{{ c.city }}</td>
             <td class="p-3 flex gap-2">
               <button type="button" class="text-[#1D4ED8] underline" @click="openEdit(c)">Изменить</button>
@@ -36,7 +46,8 @@
     <div
       v-if="modal"
       class="fixed inset-0 bg-black/40 flex items-center justify-center z-[10000] p-4"
-      @click.self="modal = null"
+      @pointerdown="onBackdropPointerDown"
+      @pointerup="onBackdropPointerUp"
     >
       <div
         class="bg-white dark:bg-[#1a1a1a] rounded-lg max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 shadow-xl text-gray-900 dark:text-gray-100"
@@ -46,6 +57,20 @@
           <label class="flex flex-col gap-1">
             <span class="font-medium">Название</span>
             <input v-model="form.name" required class="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 bg-white dark:bg-[#2a2a2a]" />
+          </label>
+
+          <label class="flex flex-col gap-1">
+            <span class="font-medium">Адрес страницы (латиница, для URL)</span>
+            <input
+              v-model="form.slug"
+              required
+              maxlength="80"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 bg-white dark:bg-[#2a2a2a] font-mono text-sm"
+              placeholder="например, bokus или my-company"
+            />
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+              Ссылка будет вида <span class="font-mono">/компания/{{ form.slug || '…' }}</span>. Только a–z, цифры и дефисы, не целиком из цифр (2–80 символов).
+            </span>
           </label>
 
           <div class="flex flex-col gap-2">
@@ -76,6 +101,48 @@
             <span class="font-medium">Описание</span>
             <textarea v-model="form.description" required rows="4" class="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 bg-white dark:bg-[#2a2a2a]" />
           </label>
+
+          <fieldset class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 space-y-3">
+            <legend class="px-1 font-medium">Карусель над кнопкой «подать заявку»</legend>
+            <label class="flex flex-col gap-1">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Сколько слайдов показывать (1–10)</span>
+              <input
+                v-model.number="form.galleryCount"
+                type="number"
+                min="1"
+                max="10"
+                required
+                class="w-full max-w-[12rem] border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 bg-white dark:bg-[#2a2a2a]"
+              />
+            </label>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              Фото по порядку слева направо. Если загружено меньше, чем слайдов — на остальных будет серая заглушка.
+            </p>
+            <ul v-if="galleryImages.length" class="space-y-2 max-h-48 overflow-y-auto">
+              <li
+                v-for="(url, idx) in galleryImages"
+                :key="idx"
+                class="flex flex-wrap items-center gap-2 border border-gray-100 dark:border-gray-700 rounded p-2"
+              >
+                <img :src="url" alt="" class="h-14 w-24 object-cover rounded shrink-0 bg-gray-100 dark:bg-gray-800" />
+                <span class="text-xs font-mono truncate flex-1 min-w-0">{{ url }}</span>
+                <button type="button" class="text-red-600 text-xs underline shrink-0" @click="removeGalleryImage(idx)">
+                  Убрать
+                </button>
+              </li>
+            </ul>
+            <div class="flex flex-wrap items-end gap-2">
+              <input
+                ref="galleryFileInputRef"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                class="text-xs max-w-full"
+              />
+              <button type="button" class="px-3 py-2 bg-[#212121] dark:bg-gray-200 dark:text-gray-900 text-white rounded text-xs" @click="uploadGalleryImage">
+                Добавить фото
+              </button>
+            </div>
+          </fieldset>
 
           <fieldset class="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
             <legend class="px-1 font-medium">Технологии (справочник)</legend>
@@ -164,9 +231,10 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { useBackdropDismiss } from '../../composables/useBackdropDismiss'
 import { apiFetch } from '../../api/client'
 import { useAuthStore } from '../../stores/auth'
-import { useCompaniesStore } from '../../stores/companies'
+import { useCompaniesStore, companyPagePath } from '../../stores/companies'
 
 const auth = useAuthStore()
 const companiesStore = useCompaniesStore()
@@ -174,6 +242,10 @@ const companies = ref([])
 const loading = ref(true)
 const error = ref('')
 const modal = ref(null)
+
+const { onBackdropPointerDown, onBackdropPointerUp } = useBackdropDismiss(() => {
+  modal.value = null
+})
 const editingId = ref(null)
 const saveError = ref('')
 const selectedUniversities = ref([])
@@ -185,8 +257,11 @@ const baselineCompanyTechnologies = ref([])
 const facultyOptionKey = ref('')
 const pendingLogoFile = ref(null)
 const logoPreviewUrl = ref('')
+const galleryImages = ref([])
+const galleryFileInputRef = ref(null)
 
 const form = reactive({
+  slug: '',
   name: '',
   logo: '',
   description: '',
@@ -196,6 +271,7 @@ const form = reactive({
   faculty: '',
   lat: '',
   lng: '',
+  galleryCount: 3,
 })
 
 const catalogTechNameSet = computed(() => new Set(catalogTechnologies.value.map((t) => t.name)))
@@ -265,6 +341,33 @@ watch(
   }
 )
 
+async function uploadGalleryImage() {
+  saveError.value = ''
+  const input = galleryFileInputRef.value
+  const file = input?.files?.[0]
+  if (!file) {
+    saveError.value = 'Выберите файл изображения'
+    return
+  }
+  if (galleryImages.value.length >= 20) {
+    saveError.value = 'Не больше 20 фото'
+    return
+  }
+  const fd = new FormData()
+  fd.append('file', file)
+  try {
+    const up = await apiFetch('/api/admin/uploads/company-gallery', { method: 'POST', body: fd, token: auth.token })
+    galleryImages.value.push(up.url)
+    if (input) input.value = ''
+  } catch (e) {
+    saveError.value = e.message || 'Не удалось загрузить фото'
+  }
+}
+
+function removeGalleryImage(idx) {
+  galleryImages.value.splice(idx, 1)
+}
+
 function onLogoFile(e) {
   const f = e.target.files?.[0]
   pendingLogoFile.value = f || null
@@ -279,6 +382,7 @@ function onLogoFile(e) {
 }
 
 function formFromCompany(c) {
+  form.slug = c.slug || ''
   form.name = c.name
   form.logo = c.logo || ''
   form.description = c.description
@@ -288,6 +392,8 @@ function formFromCompany(c) {
   form.faculty = c.faculty
   form.lat = String(c.coordinates?.lat ?? c.lat ?? '')
   form.lng = String(c.coordinates?.lng ?? c.lng ?? '')
+  form.galleryCount = Math.min(10, Math.max(1, Number(c.galleryCount) || 3))
+  galleryImages.value = Array.isArray(c.galleryImages) ? [...c.galleryImages] : []
   const uni = Array.isArray(c.universities) && c.universities.length ? c.universities : c.university ? [c.university] : []
   selectedUniversities.value = [...uni]
   const techs = [...(c.technologies || [])]
@@ -315,6 +421,7 @@ async function load() {
 async function openCreate() {
   editingId.value = null
   Object.assign(form, {
+    slug: '',
     name: '',
     logo: '',
     description: '',
@@ -324,7 +431,9 @@ async function openCreate() {
     faculty: '',
     lat: '',
     lng: '',
+    galleryCount: 3,
   })
+  galleryImages.value = []
   selectedUniversities.value = []
   facultyOptionKey.value = ''
   baselineCompanyTechnologies.value = []
@@ -391,7 +500,21 @@ async function saveCompany() {
     return
   }
 
+  const slug = form.slug.trim().toLowerCase()
+  if (slug.length < 2 || slug.length > 80) {
+    saveError.value = 'Адрес страницы: от 2 до 80 символов'
+    return
+  }
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || /^\d+$/.test(slug)) {
+    saveError.value =
+      'Адрес страницы: только латиница в нижнем регистре, цифры и дефисы между блоками; не только цифры'
+    return
+  }
+
+  const galleryCount = Math.min(10, Math.max(1, Math.floor(Number(form.galleryCount)) || 3))
+
   const body = {
+    slug,
     name: form.name.trim(),
     logo: logoUrl,
     description: form.description.trim(),
@@ -403,6 +526,8 @@ async function saveCompany() {
     faculty: form.faculty.trim(),
     lat,
     lng,
+    galleryCount,
+    galleryImages: [...galleryImages.value],
   }
 
   try {

@@ -103,7 +103,7 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   if (to.path.includes('%')) {
     try {
       const decodedPath = decodeURIComponent(to.path)
@@ -117,6 +117,11 @@ router.beforeEach((to, from, next) => {
   }
 
   const auth = useAuthStore()
+  // Токен уже в localStorage, а /me ещё не успел (сеть, порядок загрузки) — повторяем restore.
+  if (auth.token && !auth.user) {
+    await auth.restoreSession()
+  }
+
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     next({ path: '/вход', query: { redirect: to.fullPath } })
     return
