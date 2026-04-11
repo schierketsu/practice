@@ -9,7 +9,7 @@
       :aria-busy="!mapReady"
       aria-live="polite"
     >
-      <p class="map-loading-text font-medium text-base sm:text-lg">Ожидайте...</p>
+      <p class="map-loading-text text-center text-black dark:text-white">Ожидайте...</p>
     </div>
     <div ref="mapContainer" class="w-full h-full min-h-[260px] sm:min-h-[400px] lg:min-h-[500px] map-container"></div>
 
@@ -522,9 +522,23 @@ onUnmounted(() => {
   inset: 0;
 }
 
+/* Как .filter-placeholder-heading («выберите место учебы») */
 .map-loading-text {
   font-family: 'Polonium', serif;
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.25rem;
+  font-weight: 900;
+  text-transform: uppercase;
   letter-spacing: 0.06em;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 640px) {
+  .map-loading-text {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
 }
 
 /* MapTiler SDK — скрываем атрибуцию и водяной знак (логотип) */
