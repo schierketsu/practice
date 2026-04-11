@@ -96,13 +96,13 @@ export const updateProfileSchema = z.object({
 
 export const companyWriteSchema = z.object({
   name: z.string().trim().min(1).max(200),
-  logo: z.string().trim().max(500),
+  logo: z.string().trim().min(1).max(800),
   description: z.string().trim().min(1).max(20000),
   technologies: z.array(z.string().trim().min(1).max(80)).min(1),
   sector: z.string().trim().min(1).max(200),
   contacts: z.string().trim().min(1).max(500),
   city: z.string().trim().min(1).max(200),
-  university: z.string().trim().min(1).max(300),
+  universities: z.array(z.string().trim().min(1).max(300)).min(1),
   faculty: z.string().trim().min(1).max(300),
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180),

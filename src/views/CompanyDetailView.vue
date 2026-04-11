@@ -30,15 +30,23 @@
               :key="tech"
               class="w-16 h-16 flex items-center justify-center p-2.5 bg-white dark:bg-[#1a1a1a] rounded-lg transition-colors"
             >
-              <img
-                :src="`/stack/${getTechSvgPath(tech)}`"
-                :alt="tech"
-                :class="[
-                  'w-full h-full object-contain',
-                  tech === 'PHP' && isDark ? 'brightness-0 invert' : ''
-                ]"
-                @error="handleTechImageError"
-              />
+              <div class="relative flex h-full w-full items-center justify-center">
+                <img
+                  v-show="techIconUrl(tech) && !techIconBroken.has(tech)"
+                  :src="techIconUrl(tech) || undefined"
+                  :alt="tech"
+                  :class="[
+                    'max-h-full max-w-full object-contain',
+                    tech === 'PHP' && isDark ? 'brightness-0 invert' : ''
+                  ]"
+                  @error="markTechIconBroken(tech)"
+                />
+                <div
+                  v-show="!techIconUrl(tech) || techIconBroken.has(tech)"
+                  class="h-10 w-10 shrink-0 rounded-md bg-gray-300 dark:bg-gray-600"
+                  :title="tech"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -61,15 +69,23 @@
               :key="tech"
               class="aspect-square flex items-center justify-center p-2 sm:p-3 bg-white dark:bg-[#1a1a1a] rounded-lg transition-colors"
             >
-              <img
-                :src="`/stack/${getTechSvgPath(tech)}`"
-                :alt="tech"
-                :class="[
-                  'w-full h-full object-contain p-1',
-                  tech === 'PHP' && isDark ? 'brightness-0 invert' : ''
-                ]"
-                @error="handleTechImageError"
-              />
+              <div class="relative flex h-full w-full items-center justify-center">
+                <img
+                  v-show="techIconUrl(tech) && !techIconBroken.has(tech)"
+                  :src="techIconUrl(tech) || undefined"
+                  :alt="tech"
+                  :class="[
+                    'max-h-full max-w-full object-contain p-1',
+                    tech === 'PHP' && isDark ? 'brightness-0 invert' : ''
+                  ]"
+                  @error="markTechIconBroken(tech)"
+                />
+                <div
+                  v-show="!techIconUrl(tech) || techIconBroken.has(tech)"
+                  class="h-[70%] w-[70%] max-h-12 max-w-12 rounded-md bg-gray-300 dark:bg-gray-600"
+                  :title="tech"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -330,6 +346,8 @@ const store = useCompaniesStore()
 const themeStore = useThemeStore()
 const auth = useAuthStore()
 const imageError = ref(false)
+/** Технологии, у которых иконка не загрузилась — показываем серый квадрат */
+const techIconBroken = ref(new Set())
 const currentImageIndex = ref(0)
 const pageLoading = ref(true)
 const reviews = ref([])
@@ -352,6 +370,17 @@ const reviewForm = reactive({
 const isDark = computed(() => themeStore.isDark)
 
 const company = computed(() => store.getCompanyById(route.params.id))
+
+watch(
+  () => company.value?.id,
+  () => {
+    techIconBroken.value = new Set()
+  },
+)
+
+function markTechIconBroken(tech) {
+  techIconBroken.value = new Set([...techIconBroken.value, tech])
+}
 
 async function loadReviews() {
   const id = route.params.id
@@ -491,9 +520,14 @@ function previousImage() {
   }
 }
 
+const grayImgDataUri =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600"><rect fill="#e5e7eb" width="100%" height="100%"/></svg>'
+  )
+
 function handleCarouselImageError(event) {
-  // Заменяем на заглушку при ошибке загрузки
-  event.target.src = '/bokus.jpg'
+  event.target.src = grayImgDataUri
 }
 
 const parsedContacts = computed(() => {
@@ -520,39 +554,8 @@ function getPlaceholderText(name) {
   return name.charAt(0).toUpperCase()
 }
 
-// Маппинг названий технологий на пути к SVG файлам
-function getTechSvgPath(tech) {
-  const techMap = {
-    'Vue': 'vue.svg',
-    'React': 'reactquery.svg', // используем reactquery.svg, так как react.svg нет
-    'TypeScript': 'typescript.svg',
-    'Flutter': 'flutter.svg',
-    'PHP': 'php.svg',
-    'C#': 'csharp.svg',
-    'C++': 'c-plusplus.svg',
-    'Python': 'python.svg',
-    'FastAPI': 'fastapi.svg',
-    'Laravel': 'laravel.svg',
-    'Kotlin': 'kotlin.svg',
-    'Entity': 'csharp.svg', // используем csharp.svg для Entity
-    'Битрикс': 'php.svg', // используем php.svg для Битрикс
-    '1C CRM': 'csharp.svg', // используем csharp.svg для 1C CRM
-    'JavaScript': 'javascript.svg',
-    'CSS': 'css.svg',
-    'Tailwind CSS': 'tailwindcss.svg',
-    'Django': 'django.svg',
-    'Dart': 'dart.svg',
-    'PostgreSQL': 'postgresql.svg',
-    'Angular': 'angular.svg',
-    'C': 'c.svg'
-  }
-  
-  return techMap[tech] || 'javascript.svg' // fallback на javascript.svg если технология не найдена
-}
-
-function handleTechImageError(event) {
-  // Скрываем изображение при ошибке загрузки
-  event.target.style.display = 'none'
+function techIconUrl(tech) {
+  return store.techIconUrlFor(tech)
 }
 </script>
 

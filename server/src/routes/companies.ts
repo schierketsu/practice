@@ -1,40 +1,12 @@
 import { Router } from 'express'
 import { prisma } from '../lib/prisma.js'
+import { mapCompany } from '../lib/mapCompany.js'
 import { createReviewSchema } from '../lib/validation.js'
 import { ReviewStatus } from '@prisma/client'
 import type { AuthedRequest } from '../middleware/auth.js'
 import { requireAuth } from '../middleware/auth.js'
 
 const router = Router()
-
-function mapCompany(c: {
-  id: number
-  name: string
-  logo: string
-  description: string
-  technologies: unknown
-  sector: string
-  contacts: string
-  city: string
-  university: string
-  faculty: string
-  lat: number
-  lng: number
-}) {
-  return {
-    id: c.id,
-    name: c.name,
-    logo: c.logo,
-    description: c.description,
-    technologies: c.technologies as string[],
-    sector: c.sector,
-    contacts: c.contacts,
-    city: c.city,
-    university: c.university,
-    faculty: c.faculty,
-    coordinates: { lat: c.lat, lng: c.lng },
-  }
-}
 
 function mapReview(r: {
   id: number

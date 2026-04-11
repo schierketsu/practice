@@ -8,6 +8,8 @@ import ProfileSettingsView from '../views/ProfileSettingsView.vue'
 import AdminUsersView from '../views/admin/AdminUsersView.vue'
 import AdminCompaniesView from '../views/admin/AdminCompaniesView.vue'
 import AdminReviewsView from '../views/admin/AdminReviewsView.vue'
+import AdminUniversitiesView from '../views/admin/AdminUniversitiesView.vue'
+import AdminTechnologiesView from '../views/admin/AdminTechnologiesView.vue'
 import { useAuthStore } from '../stores/auth'
 
 const router = createRouter({
@@ -68,6 +70,18 @@ const router = createRouter({
           path: 'компании',
           name: 'admin-companies',
           component: AdminCompaniesView,
+          meta: { requiresAdmin: true },
+        },
+        {
+          path: 'вузы',
+          name: 'admin-universities',
+          component: AdminUniversitiesView,
+          meta: { requiresAdmin: true },
+        },
+        {
+          path: 'технологии',
+          name: 'admin-technologies',
+          component: AdminTechnologiesView,
           meta: { requiresAdmin: true },
         },
         {

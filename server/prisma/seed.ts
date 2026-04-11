@@ -14,7 +14,7 @@ const companies = [
     sector: 'Автоматизация бизнеса',
     contacts: 'hr@bocus.ru, +7 (495) 123-45-67',
     city: 'Чебоксары',
-    university: 'ЧУВГУ ИМ. И. Н. УЛЬЯНОВА',
+    universities: ['ЧУВГУ ИМ. И. Н. УЛЬЯНОВА'],
     faculty: 'факультет ИВТ',
     lat: 56.15233,
     lng: 47.195723,
@@ -28,7 +28,7 @@ const companies = [
     sector: 'Микроконтролллеры',
     contacts: 'practice@ekra.ru, +7 (812) 234-56-78',
     city: 'Чебоксары',
-    university: 'ЧУВГУ ИМ. И. Н. УЛЬЯНОВА',
+    universities: ['ЧУВГУ ИМ. И. Н. УЛЬЯНОВА'],
     faculty: 'факультет ИВТ',
     lat: 56.112333,
     lng: 47.257424,
@@ -42,7 +42,7 @@ const companies = [
     sector: 'Автоматизация бизнеса',
     contacts: 'careers@f5.com, +7 (495) 345-67-89',
     city: 'Чебоксары',
-    university: 'ЧУВГУ ИМ. И. Н. УЛЬЯНОВА',
+    universities: ['ЧУВГУ ИМ. И. Н. УЛЬЯНОВА'],
     faculty: 'факультет ИВТ',
     lat: 56.134753,
     lng: 47.244015,
@@ -56,7 +56,7 @@ const companies = [
     sector: 'Инфобез',
     contacts: 'hr@keysystems.ru, +7 (495) 567-89-01',
     city: 'Чебоксары',
-    university: 'ЧУВГУ ИМ. И. Н. УЛЬЯНОВА',
+    universities: ['ЧУВГУ ИМ. И. Н. УЛЬЯНОВА'],
     faculty: 'факультет ИВТ',
     lat: 56.151836,
     lng: 47.234289,
@@ -148,10 +148,33 @@ const seedReviews: Record<
   ],
 }
 
+const seedUniversityNames = [
+  'ЧУВГУ ИМ. И. Н. УЛЬЯНОВА',
+  'МГУ им. М. В. Ломоносова',
+  'СПбГУ',
+  'НИУ ВШЭ',
+  'МФТИ',
+  'КНИТУ-КАИ',
+]
+
 async function main() {
   await prisma.review.deleteMany()
   await prisma.company.deleteMany()
+  await prisma.faculty.deleteMany()
+  await prisma.university.deleteMany()
   await prisma.user.deleteMany()
+
+  for (const name of seedUniversityNames) {
+    await prisma.university.create({
+      data: {
+        name,
+        faculties:
+          name === 'ЧУВГУ ИМ. И. Н. УЛЬЯНОВА'
+            ? { create: [{ name: 'факультет ИВТ' }] }
+            : undefined,
+      },
+    })
+  }
 
   const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@practice.local'
   const adminPassword = process.env.ADMIN_PASSWORD ?? 'Admin123!'

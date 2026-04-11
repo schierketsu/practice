@@ -1,17 +1,81 @@
+import fs from 'fs'
+import path from 'path'
 import { Router } from 'express'
+import multer from 'multer'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
+import { mapCompany } from '../lib/mapCompany.js'
+import {
+  assertTechnologiesInCatalog,
+  technologyUsedInCompanies,
+  toUploadsUrl,
+} from '../lib/technologyCatalog.js'
 import { companyWriteSchema } from '../lib/validation.js'
 import { ReviewStatus, Role } from '@prisma/client'
 import type { AuthedRequest } from '../middleware/auth.js'
 import { requireAuth, requireAdmin } from '../middleware/auth.js'
+import adminUniversitiesRoutes, {
+  assertCompanyUniversitiesAndFaculty,
+} from './adminUniversities.js'
 
 const router = Router()
 router.use(requireAuth, requireAdmin)
+router.use(adminUniversitiesRoutes)
+
+const UPLOAD_ROOT = path.join(process.cwd(), 'uploads')
+const imageMime = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'])
+
+const companyLogoStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    const dir = path.join(UPLOAD_ROOT, 'companies')
+    fs.mkdirSync(dir, { recursive: true })
+    cb(null, dir)
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase()
+    const safe = ['.png', '.jpg', '.jpeg', '.webp', '.gif'].includes(ext) ? ext : '.png'
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 9)}${safe}`)
+  },
+})
+
+const uploadCompanyLogo = multer({
+  storage: companyLogoStorage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (imageMime.has(file.mimetype)) cb(null, true)
+    else cb(new Error('Допустимы только изображения PNG, JPEG, WebP, GIF'))
+  },
+})
+
+const techIconStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    const dir = path.join(UPLOAD_ROOT, 'tech-icons')
+    fs.mkdirSync(dir, { recursive: true })
+    cb(null, dir)
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase()
+    const safe = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg'].includes(ext) ? ext : '.png'
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 9)}${safe}`)
+  },
+})
+
+const uploadTechIcon = multer({
+  storage: techIconStorage,
+  limits: { fileSize: 1 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (imageMime.has(file.mimetype) || file.mimetype === 'image/svg+xml') cb(null, true)
+    else cb(new Error('Допустимы только изображения или SVG'))
+  },
+})
 
 const patchUserSchema = z.object({
   role: z.nativeEnum(Role).optional(),
   blocked: z.boolean().optional(),
+})
+
+const technologyCreateBody = z.object({
+  name: z.string().trim().min(1).max(80),
 })
 
 const patchReviewSchema = z.object({
@@ -24,34 +88,112 @@ const patchReviewSchema = z.object({
   periodLabel: z.string().trim().max(100).nullable().optional(),
 })
 
-function mapCompany(c: {
-  id: number
-  name: string
-  logo: string
-  description: string
-  technologies: unknown
-  sector: string
-  contacts: string
-  city: string
-  university: string
-  faculty: string
-  lat: number
-  lng: number
-}) {
-  return {
-    id: c.id,
-    name: c.name,
-    logo: c.logo,
-    description: c.description,
-    technologies: c.technologies as string[],
-    sector: c.sector,
-    contacts: c.contacts,
-    city: c.city,
-    university: c.university,
-    faculty: c.faculty,
-    coordinates: { lat: c.lat, lng: c.lng },
+router.post('/uploads/company-logo', (req, res, next) => {
+  uploadCompanyLogo.single('file')(req, res, (err: unknown) => {
+    if (err) {
+      const msg = err instanceof Error ? err.message : 'Ошибка загрузки'
+      return res.status(400).json({ error: msg })
+    }
+    next()
+  })
+}, (req, res) => {
+  const f = req.file
+  if (!f) return res.status(400).json({ error: 'Нет файла (поле file)' })
+  const rel = path.join('companies', f.filename).replace(/\\/g, '/')
+  return res.json({ url: `/uploads/${rel}` })
+})
+
+router.get('/technology-icons', async (_req, res) => {
+  const rows = await prisma.technologyIcon.findMany({ orderBy: { name: 'asc' } })
+  return res.json({
+    icons: rows.map((r) => ({
+      name: r.name,
+      url: r.iconPath ? toUploadsUrl(r.iconPath) : null,
+    })),
+  })
+})
+
+router.post('/technologies', async (req, res) => {
+  const parsed = technologyCreateBody.safeParse(req.body)
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Ошибка валидации', details: parsed.error.flatten() })
   }
-}
+  try {
+    const row = await prisma.technologyIcon.create({
+      data: { name: parsed.data.name, iconPath: null },
+    })
+    return res.status(201).json({ technology: { name: row.name, url: null } })
+  } catch {
+    return res.status(409).json({ error: 'Технология с таким именем уже есть' })
+  }
+})
+
+router.delete('/technologies', async (req, res) => {
+  const name = String((req.query as { name?: string }).name ?? '').trim()
+  if (!name) return res.status(400).json({ error: 'Укажите query name' })
+  if (await technologyUsedInCompanies(name)) {
+    return res.status(409).json({ error: 'Технология указана у компаний — сначала измените компании' })
+  }
+  try {
+    const row = await prisma.technologyIcon.findUnique({ where: { name } })
+    if (!row) return res.status(404).json({ error: 'Не найдено' })
+    if (row.iconPath) {
+      const abs = path.join(UPLOAD_ROOT, row.iconPath)
+      try {
+        fs.unlinkSync(abs)
+      } catch {
+        /* ignore */
+      }
+    }
+    await prisma.technologyIcon.delete({ where: { name } })
+    return res.json({ ok: true })
+  } catch {
+    return res.status(500).json({ error: 'Не удалось удалить' })
+  }
+})
+
+router.post('/uploads/tech-icon', (req, res, next) => {
+  uploadTechIcon.single('file')(req, res, (err: unknown) => {
+    if (err) {
+      const msg = err instanceof Error ? err.message : 'Ошибка загрузки'
+      return res.status(400).json({ error: msg })
+    }
+    next()
+  })
+}, async (req, res) => {
+  const f = req.file
+  const name = String((req.body as { name?: string }).name ?? '').trim()
+  if (!f || !name) return res.status(400).json({ error: 'Нужны поле file и name (имя технологии)' })
+  const rel = path.join('tech-icons', f.filename).replace(/\\/g, '/')
+  await prisma.technologyIcon.upsert({
+    where: { name },
+    create: { name, iconPath: rel },
+    update: { iconPath: rel },
+  })
+  return res.json({ name, url: `/uploads/${rel}` })
+})
+
+/** Удаление только файла иконки; запись в БД остаётся с iconPath = null */
+router.delete('/technology-icons', async (req, res) => {
+  const name = String((req.query as { name?: string }).name ?? '').trim()
+  if (!name) return res.status(400).json({ error: 'Укажите query name' })
+  try {
+    const row = await prisma.technologyIcon.findUnique({ where: { name } })
+    if (!row) return res.status(404).json({ error: 'Не найдено' })
+    if (row.iconPath) {
+      const abs = path.join(UPLOAD_ROOT, row.iconPath)
+      try {
+        fs.unlinkSync(abs)
+      } catch {
+        /* ignore */
+      }
+    }
+    await prisma.technologyIcon.update({ where: { name }, data: { iconPath: null } })
+    return res.json({ ok: true })
+  } catch {
+    return res.status(500).json({ error: 'Не удалось удалить файл' })
+  }
+})
 
 router.get('/users', async (_req, res) => {
   const users = await prisma.user.findMany({
@@ -88,6 +230,10 @@ router.post('/companies', async (req, res) => {
     return res.status(400).json({ error: 'Ошибка валидации', details: parsed.error.flatten() })
   }
   const d = parsed.data
+  const catalogErr = await assertCompanyUniversitiesAndFaculty(d.universities, d.faculty)
+  if (catalogErr) return res.status(400).json({ error: catalogErr })
+  const techErr = await assertTechnologiesInCatalog(d.technologies)
+  if (techErr) return res.status(400).json({ error: techErr })
   const c = await prisma.company.create({
     data: {
       name: d.name,
@@ -97,7 +243,7 @@ router.post('/companies', async (req, res) => {
       sector: d.sector,
       contacts: d.contacts,
       city: d.city,
-      university: d.university,
+      universities: d.universities,
       faculty: d.faculty,
       lat: d.lat,
       lng: d.lng,
@@ -114,6 +260,10 @@ router.put('/companies/:id', async (req, res) => {
     return res.status(400).json({ error: 'Ошибка валидации', details: parsed.error.flatten() })
   }
   const d = parsed.data
+  const catalogErr = await assertCompanyUniversitiesAndFaculty(d.universities, d.faculty)
+  if (catalogErr) return res.status(400).json({ error: catalogErr })
+  const techErr = await assertTechnologiesInCatalog(d.technologies)
+  if (techErr) return res.status(400).json({ error: techErr })
   try {
     const c = await prisma.company.update({
       where: { id },
@@ -125,7 +275,7 @@ router.put('/companies/:id', async (req, res) => {
         sector: d.sector,
         contacts: d.contacts,
         city: d.city,
-        university: d.university,
+        universities: d.universities,
         faculty: d.faculty,
         lat: d.lat,
         lng: d.lng,

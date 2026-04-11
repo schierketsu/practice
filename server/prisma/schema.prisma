@@ -44,11 +44,36 @@ model Company {
   sector       String
   contacts     String
   city         String
-  university   String
+  /// Список вузов (JSON-массив строк), по которым фильтруется карта
+  universities Json
   faculty      String
   lat          Float
   lng          Float
   reviews      Review[]
+}
+
+model TechnologyIcon {
+  id       Int     @id @default(autoincrement())
+  /// Имя технологии как в company.technologies (точное совпадение)
+  name     String  @unique
+  /// Относительный путь: uploads/tech-icons/... (null — иконка не загружена)
+  iconPath String?
+}
+
+/// Справочник вузов (имена совпадают со строками в company.universities JSON)
+model University {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  faculties Faculty[]
+}
+
+model Faculty {
+  id           Int        @id @default(autoincrement())
+  name         String
+  universityId Int
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@unique([universityId, name])
 }
 
 model Review {

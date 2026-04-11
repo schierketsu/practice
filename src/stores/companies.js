@@ -2,6 +2,14 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiFetch } from '../api/client'
 
+/** Список вузов компании (новое поле universities или legacy university) */
+export function companyUniversitiesList(company) {
+  const u = company?.universities
+  if (Array.isArray(u) && u.length > 0) return u.filter(Boolean)
+  if (company?.university) return [company.university]
+  return []
+}
+
 export const useCompaniesStore = defineStore('companies', () => {
   const companies = ref([])
   const loadError = ref(null)
@@ -13,6 +21,34 @@ export const useCompaniesStore = defineStore('companies', () => {
   const selectedCity = ref('')
   const selectedUniversity = ref('')
   const selectedFaculty = ref('')
+
+  const technologyIconUrls = ref({})
+  /** Справочник технологий с полем iconUrl (null — показываем серый квадрат) */
+  const technologyCatalog = ref([])
+
+  async function fetchTechnologyIcons() {
+    try {
+      const data = await apiFetch('/api/technologies', { skipAuth: true })
+      const list = data.technologies || []
+      technologyCatalog.value = list
+      const o = {}
+      for (const t of list) {
+        if (t.iconUrl) o[t.name] = t.iconUrl
+      }
+      technologyIconUrls.value = o
+    } catch {
+      technologyCatalog.value = []
+      technologyIconUrls.value = {}
+    }
+  }
+
+  /** URL иконки или null (без подстановки /public/stack) */
+  function techIconUrlFor(tech) {
+    const u = technologyIconUrls.value[tech]
+    if (u) return u
+    const row = technologyCatalog.value.find((t) => t.name === tech)
+    return row?.iconUrl ?? null
+  }
 
   async function fetchCompanies() {
     loading.value = true
@@ -27,9 +63,13 @@ export const useCompaniesStore = defineStore('companies', () => {
     } finally {
       loading.value = false
     }
+    await fetchTechnologyIcons()
   }
 
   const allTechnologies = computed(() => {
+    if (technologyCatalog.value.length > 0) {
+      return technologyCatalog.value.map((t) => t.name)
+    }
     const techSet = new Set()
     companies.value.forEach((company) => {
       ;(company.technologies || []).forEach((tech) => techSet.add(tech))
@@ -60,7 +100,9 @@ export const useCompaniesStore = defineStore('companies', () => {
     }
 
     if (selectedUniversity.value) {
-      result = result.filter((company) => company.university === selectedUniversity.value)
+      result = result.filter((company) =>
+        companyUniversitiesList(company).includes(selectedUniversity.value)
+      )
     }
 
     if (selectedFaculty.value) {
@@ -79,18 +121,10 @@ export const useCompaniesStore = defineStore('companies', () => {
   })
 
   const universities = computed(() => {
-    if (!selectedCity.value) {
-      const uniSet = new Set()
-      companies.value.forEach((company) => {
-        if (company.university) uniSet.add(company.university)
-      })
-      return Array.from(uniSet).sort()
-    }
     const uniSet = new Set()
     companies.value.forEach((company) => {
-      if (company.city === selectedCity.value && company.university) {
-        uniSet.add(company.university)
-      }
+      if (selectedCity.value && company.city !== selectedCity.value) return
+      companyUniversitiesList(company).forEach((u) => uniSet.add(u))
     })
     return Array.from(uniSet).sort()
   })
@@ -105,7 +139,10 @@ export const useCompaniesStore = defineStore('companies', () => {
     }
     const facSet = new Set()
     companies.value.forEach((company) => {
-      if (company.university === selectedUniversity.value && company.faculty) {
+      if (
+        companyUniversitiesList(company).includes(selectedUniversity.value) &&
+        company.faculty
+      ) {
         facSet.add(company.faculty)
       }
     })
@@ -168,6 +205,10 @@ export const useCompaniesStore = defineStore('companies', () => {
     clearFilters,
     dismissMobileMapCompanyCard,
     mobileMapSelectedCompanyId,
+    technologyIconUrls,
+    technologyCatalog,
+    fetchTechnologyIcons,
+    techIconUrlFor,
     getCompanyById,
   }
 })
