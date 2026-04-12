@@ -6,6 +6,26 @@
       >
         <div class="flex items-center justify-between gap-2 flex-wrap">
           <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <button
+              v-if="companyFromSearchUi"
+              type="button"
+              class="header-btn group px-2 py-2 sm:px-4 sm:py-3 font-bold text-xs sm:text-base whitespace-nowrap inline-flex items-center justify-center"
+              aria-label="Назад к списку организаций"
+              @click="returnFromCompanySearch"
+            >
+              <span class="relative inline-flex h-5 w-8 sm:h-6 sm:w-9 shrink-0 items-center justify-center pointer-events-none">
+                <img
+                  src="/backwhite.png"
+                  alt=""
+                  class="h-5 w-auto sm:h-6 max-h-[1.75rem] object-contain object-center"
+                />
+                <img
+                  src="/back.png"
+                  alt=""
+                  class="absolute inset-0 m-auto h-5 w-auto sm:h-6 max-h-[1.75rem] object-contain object-center opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100"
+                />
+              </span>
+            </button>
             <router-link
               v-if="auth.isAuthenticated && !isProfileRoute"
               to="/профиль"
@@ -52,10 +72,10 @@
             </router-link>
           </div>
           <div
-            class="flex items-center gap-2 sm:gap-4 flex-wrap justify-end max-w-full"
+            class="hidden sm:flex items-center gap-2 sm:gap-4 flex-wrap justify-end max-w-full"
           >
             <p
-              class="m-0 text-right text-[11px] sm:text-sm text-gray-600 leading-snug max-w-[min(100%,20rem)] sm:max-w-none"
+              class="m-0 text-right text-sm text-gray-600 leading-snug max-w-none"
             >
               По вопросам и предложениям:
               <a
@@ -83,8 +103,10 @@ import Footer from './components/Footer.vue'
 import LoginModal from './components/LoginModal.vue'
 import RegisterModal from './components/RegisterModal.vue'
 import { useAuthStore } from './stores/auth'
-
-const PROFILE_HEADER_RETURN_KEY = 'profileHeaderReturn'
+import {
+  PROFILE_HEADER_RETURN_KEY,
+  COMPANY_SEARCH_RETURN_KEY,
+} from './lib/navigationKeys'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -93,8 +115,42 @@ const loginModalOpen = ref(false)
 const registerModalOpen = ref(false)
 
 const isProfileRoute = computed(() => route.path.startsWith('/профиль'))
-/** Ссылка «практики» справа — не на главной со списком компаний */
-const showPracticesNavLink = computed(() => route.name !== 'home')
+
+/** Карточка компании после перехода с главной практик (поиск / карта). */
+const companyFromSearchUi = computed(() => {
+  if (route.name !== 'company-detail') return false
+  if (typeof sessionStorage === 'undefined') return false
+  return !!sessionStorage.getItem(COMPANY_SEARCH_RETURN_KEY)
+})
+
+/** Путь, с которого зашли в профиль (для кнопки «назад»). */
+function getProfileReturnPath() {
+  if (typeof sessionStorage === 'undefined') return ''
+  return sessionStorage.getItem(PROFILE_HEADER_RETURN_KEY) || ''
+}
+
+/** Страница списка практик (главная карта/список). */
+function pathIsPracticesHome(fullPath) {
+  if (!fullPath || typeof fullPath !== 'string') return false
+  let p = fullPath.trim().split('?')[0].split('#')[0]
+  try {
+    p = decodeURIComponent(p)
+  } catch {
+    /* оставляем как есть */
+  }
+  return p === '/практики' || p === '/'
+}
+
+/**
+ * Ссылка «практики» — не на главной практик.
+ * На профиле с `/практики` и на компании после поиска с главной — без дублирующей «практики».
+ */
+const showPracticesNavLink = computed(() => {
+  if (route.name === 'home') return false
+  if (companyFromSearchUi.value) return false
+  if (isProfileRoute.value && pathIsPracticesHome(getProfileReturnPath())) return false
+  return true
+})
 
 function saveProfileReturnPath() {
   if (!route.path.startsWith('/профиль')) {
@@ -110,6 +166,12 @@ function returnFromProfile() {
   } else {
     router.push('/практики')
   }
+}
+
+function returnFromCompanySearch() {
+  const target = sessionStorage.getItem(COMPANY_SEARCH_RETURN_KEY) || '/практики'
+  sessionStorage.removeItem(COMPANY_SEARCH_RETURN_KEY)
+  router.push(target)
 }
 
 function switchToRegister() {

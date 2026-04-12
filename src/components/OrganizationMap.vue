@@ -284,7 +284,7 @@ function createPopupContent(company) {
         </div>
       </div>
       <button
-        onclick="window.location.href='/компания/${companyPathEncoded}'"
+        onclick="if(window.__studpraktOpenCompany)window.__studpraktOpenCompany('/компания/${companyPathEncoded}');else window.location.href='/компания/${companyPathEncoded}'"
         style="position: absolute; top: 0; right: 0; bottom: 0; width: ${btnW}px; padding-left: 8px; padding-right: 8px; background-color: #1D4ED8; color: #ffffff; border: none; border-radius: 0 12px 12px 0; font-weight: 700; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center; z-index: 10; margin: 0;"
         onmouseover="this.style.backgroundColor='#164bc2'"
         onmouseout="this.style.backgroundColor='#1D4ED8'"
@@ -405,6 +405,10 @@ function syncMobileUi() {
 }
 
 onMounted(() => {
+  window.__studpraktOpenCompany = (path) => {
+    if (typeof path === 'string') router.push(path)
+  }
+
   if (!mapContainer.value) return
 
   const apiKey = import.meta.env.VITE_MAPTILER_API_KEY || 'Ju1zrsm8seD6T8aFIWmd'
@@ -488,6 +492,8 @@ watch(
 )
 
 onUnmounted(() => {
+  delete window.__studpraktOpenCompany
+
   if (markersUpdateScheduled != null) {
     clearTimeout(markersUpdateScheduled)
     markersUpdateScheduled = null

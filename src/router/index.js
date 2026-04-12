@@ -11,6 +11,7 @@ import AdminReviewsView from '../views/admin/AdminReviewsView.vue'
 import AdminUniversitiesView from '../views/admin/AdminUniversitiesView.vue'
 import AdminTechnologiesView from '../views/admin/AdminTechnologiesView.vue'
 import { useAuthStore } from '../stores/auth'
+import { COMPANY_SEARCH_RETURN_KEY } from '../lib/navigationKeys'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -114,6 +115,13 @@ router.beforeEach(async (to, from, next) => {
     } catch (e) {
       console.error('Error decoding path:', e)
     }
+  }
+
+  if (to.name === 'company-detail' && from.name === 'home') {
+    sessionStorage.setItem(COMPANY_SEARCH_RETURN_KEY, from.fullPath)
+  }
+  if (to.name === 'home' && from.name === 'company-detail') {
+    sessionStorage.removeItem(COMPANY_SEARCH_RETURN_KEY)
   }
 
   const auth = useAuthStore()
