@@ -11,7 +11,7 @@
           aria-label="Выйти"
           @click="logoutAndLeave"
         >
-          <img :src="exitIcon" alt="" class="w-7 h-7 sm:w-8 sm:h-8 object-contain block" width="32" height="32" />
+          <img src="/exit2.png" alt="" class="w-7 h-7 sm:w-8 sm:h-8 object-contain block" width="32" height="32" />
         </button>
       </div>
       <p
@@ -45,7 +45,6 @@
 import { RouterView } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import exitIcon from '../assets/icons/exit.png'
 
 const auth = useAuthStore()
 const router = useRouter()

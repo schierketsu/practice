@@ -40,12 +40,14 @@
           {{ profilePending ? 'Сохранение…' : 'Сохранить имя и фамилию' }}
         </button>
       </form>
+    </section>
 
-      <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-600 max-w-xl">
-        <h3 class="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-2">Резюме</h3>
-        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 max-w-2xl leading-relaxed">
-          PDF или Word до 5 МБ. Можно заменить файл, загрузив новый.
-        </p>
+    <section class="min-w-0">
+      <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-2">Резюме</h2>
+      <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 max-w-2xl leading-relaxed">
+        PDF или Word до 5 МБ. Можно заменить файл, загрузив новый.
+      </p>
+      <div class="max-w-xl">
         <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <input
             ref="resumeInputRef"
@@ -102,59 +104,12 @@
         <p v-if="resumeError" class="text-red-600 dark:text-red-400 text-sm mt-2">{{ resumeError }}</p>
       </div>
     </section>
-
-    <section class="min-w-0">
-      <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-6">Смена пароля</h2>
-      <form class="flex flex-col gap-4 max-w-xl" @submit.prevent="changePwd">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Текущий пароль</label>
-          <input
-            v-model="currentPassword"
-            type="password"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-          />
-          <p v-if="pwdErrors.currentPassword" class="text-red-600 dark:text-red-400 text-sm mt-1">
-            {{ pwdErrors.currentPassword }}
-          </p>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Новый пароль</label>
-          <input
-            v-model="newPassword"
-            type="password"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-          />
-          <p v-if="pwdErrors.password" class="text-red-600 dark:text-red-400 text-sm mt-1">{{ pwdErrors.password }}</p>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Повтор нового пароля</label>
-          <input
-            v-model="newPasswordConfirm"
-            type="password"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
-          />
-          <p v-if="pwdErrors.passwordConfirm" class="text-red-600 dark:text-red-400 text-sm mt-1">
-            {{ pwdErrors.passwordConfirm }}
-          </p>
-        </div>
-        <p v-if="pwdMessage" class="text-green-700 dark:text-green-400 text-sm">{{ pwdMessage }}</p>
-        <p v-if="pwdFormError" class="text-red-600 dark:text-red-400 text-sm">{{ pwdFormError }}</p>
-        <button
-          type="submit"
-          :disabled="pwdPending"
-          class="self-start px-6 py-2.5 bg-[#212121] dark:bg-gray-200 dark:text-gray-900 text-white font-medium rounded-lg hover:opacity-90 disabled:opacity-50"
-        >
-          {{ pwdPending ? 'Сохранение…' : 'Обновить пароль' }}
-        </button>
-      </form>
-    </section>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted, computed } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
-import { changePasswordFormSchema } from '../validation/authSchema'
 import { apiBase, getStoredToken } from '../api/client'
 
 const auth = useAuthStore()
@@ -283,48 +238,6 @@ async function saveProfile() {
     profileError.value = e.message || 'Не удалось сохранить'
   } finally {
     profilePending.value = false
-  }
-}
-
-const currentPassword = ref('')
-const newPassword = ref('')
-const newPasswordConfirm = ref('')
-const pwdErrors = reactive({})
-const pwdFormError = ref('')
-const pwdMessage = ref('')
-const pwdPending = ref(false)
-
-async function changePwd() {
-  pwdMessage.value = ''
-  pwdFormError.value = ''
-  Object.keys(pwdErrors).forEach((k) => delete pwdErrors[k])
-  const parsed = changePasswordFormSchema.safeParse({
-    currentPassword: currentPassword.value,
-    password: newPassword.value,
-    passwordConfirm: newPasswordConfirm.value,
-  })
-  if (!parsed.success) {
-    const f = parsed.error.flatten().fieldErrors
-    if (f.currentPassword?.[0]) pwdErrors.currentPassword = f.currentPassword[0]
-    if (f.password?.[0]) pwdErrors.password = f.password[0]
-    if (f.passwordConfirm?.[0]) pwdErrors.passwordConfirm = f.passwordConfirm[0]
-    return
-  }
-  pwdPending.value = true
-  try {
-    await auth.changePassword({
-      currentPassword: parsed.data.currentPassword,
-      password: parsed.data.password.trim(),
-      passwordConfirm: parsed.data.password.trim(),
-    })
-    pwdMessage.value = 'Пароль обновлён'
-    currentPassword.value = ''
-    newPassword.value = ''
-    newPasswordConfirm.value = ''
-  } catch (e) {
-    pwdFormError.value = e.message || 'Не удалось сменить пароль'
-  } finally {
-    pwdPending.value = false
   }
 }
 </script>

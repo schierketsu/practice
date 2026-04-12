@@ -18,11 +18,22 @@
             <button
               v-else-if="auth.isAuthenticated && isProfileRoute"
               type="button"
-              class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base whitespace-nowrap"
+              class="header-btn group px-2 py-2 sm:px-4 sm:py-3 font-bold text-xs sm:text-base whitespace-nowrap inline-flex items-center justify-center"
+              aria-label="Вернуться назад"
               @click="returnFromProfile"
             >
-              <span class="hidden sm:inline">вернуться</span>
-              <span class="sm:hidden">назад</span>
+              <span class="relative inline-flex h-5 w-8 sm:h-6 sm:w-9 shrink-0 items-center justify-center pointer-events-none">
+                <img
+                  src="/backwhite.png"
+                  alt=""
+                  class="h-5 w-auto sm:h-6 max-h-[1.75rem] object-contain object-center"
+                />
+                <img
+                  src="/back.png"
+                  alt=""
+                  class="absolute inset-0 m-auto h-5 w-auto sm:h-6 max-h-[1.75rem] object-contain object-center opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100"
+                />
+              </span>
             </button>
             <button
               v-if="!auth.isAuthenticated"
@@ -32,17 +43,26 @@
             >
               вход
             </button>
-          </div>
-          <div
-            v-if="showPracticesNavLink"
-            class="flex items-center gap-2 sm:gap-3 flex-wrap"
-          >
             <router-link
+              v-if="showPracticesNavLink"
               to="/практики"
-              class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base inline-block no-underline whitespace-nowrap"
+              class="header-btn px-2 py-1.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-base inline-block no-underline whitespace-nowrap shrink-0"
             >
               практики
             </router-link>
+          </div>
+          <div
+            class="flex items-center gap-2 sm:gap-4 flex-wrap justify-end max-w-full"
+          >
+            <p
+              class="m-0 text-right text-[11px] sm:text-sm text-gray-600 leading-snug max-w-[min(100%,20rem)] sm:max-w-none"
+            >
+              По вопросам и предложениям:
+              <a
+                href="mailto:info@studprakt.ru"
+                class="text-[#1d4ed8] font-medium underline-offset-2 hover:underline break-all sm:break-normal"
+              >info@studprakt.ru</a>
+            </p>
           </div>
         </div>
       </div>
