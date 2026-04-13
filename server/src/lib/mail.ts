@@ -1,4 +1,5 @@
 import dns from 'node:dns'
+import type { LookupCallback, LookupOptions } from 'node:dns'
 import nodemailer from 'nodemailer'
 
 /** `smtp` — реальная отправка. `log` — только вывод в консоль (домашняя сеть часто блокирует SMTP). */
@@ -14,7 +15,7 @@ export function getMailMode(): 'smtp' | 'log' {
 function smtpLookup(): nodemailer.TransportOptions['lookup'] | undefined {
   const v = (process.env.SMTP_IPV4_ONLY ?? 'true').toLowerCase()
   if (v === 'false' || v === '0' || v === 'no') return undefined
-  return (hostname, _options, callback) => {
+  return (hostname: string, _options: LookupOptions, callback: LookupCallback) => {
     dns.lookup(hostname, { family: 4 }, callback)
   }
 }
