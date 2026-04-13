@@ -68,10 +68,6 @@ const router = useRouter()
 const imageError = ref(false)
 const store = useCompaniesStore()
 
-const frontendTechs = ['Vue', 'React', 'TypeScript', 'Flutter']
-const backendTechs = ['PHP', 'C#', 'C++', 'Python', 'FastAPI', 'Laravel', 'Kotlin', 'Entity']
-const otherTechs = ['Битрикс', '1C CRM']
-
 const selectedTechnologies = computed(() => store.selectedTechnologies)
 
 const sortedTechnologies = computed(() => {
@@ -102,11 +98,10 @@ function getTechStyle(tech) {
     return 'background-color: #F3F4F6; color: #212121'
   }
   
-  if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
-    return 'background-color: #A8E4A0; color: #212121'
+  if (store.isFrontendTechnology(tech)) {
+    return 'background-color: #1D4ED8; color: #ffffff'
   }
-  
-  return 'background-color: #1D4ED8; color: #ffffff'
+  return 'background-color: #A8E4A0; color: #212121'
 }
 </script>
 

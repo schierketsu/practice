@@ -124,22 +124,16 @@ const dropdowns = ref({
   backend: false
 })
 
-// классификация технологий на фронтенд и бэкенд на основе реальных технологий компаний
-const frontendTechs = ['Vue', 'React', 'TypeScript', 'Flutter']
-const backendTechs = ['PHP', 'C#', 'C++', 'Python', 'FastAPI', 'Laravel', 'Kotlin', 'Entity']
-const otherTechs = ['Битрикс', '1C CRM']
-
+/** Колонки фильтра: FRONTEND/BACKEND задаются в админке → справочник `/api/technologies` */
 const allTechnologies = computed(() => store.allTechnologies)
 const selectedTechnologies = computed(() => store.selectedTechnologies)
 
 const frontendTechnologies = computed(() => {
-  return allTechnologies.value.filter(tech => frontendTechs.includes(tech)).sort()
+  return allTechnologies.value.filter((tech) => store.isFrontendTechnology(tech)).sort()
 })
 
 const backendTechnologies = computed(() => {
-  return allTechnologies.value.filter(tech => 
-    backendTechs.includes(tech) || otherTechs.includes(tech)
-  ).sort()
+  return allTechnologies.value.filter((tech) => !store.isFrontendTechnology(tech)).sort()
 })
 
 function toggleDropdown(type) {
@@ -170,10 +164,10 @@ function clearFilters() {
 }
 
 function getTechStyle(tech) {
-  if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
-    return 'background-color: #A8E4A0; color: #212121'
+  if (store.isFrontendTechnology(tech)) {
+    return 'background-color: #1D4ED8; color: #ffffff'
   }
-  return 'background-color: #1D4ED8; color: #ffffff'
+  return 'background-color: #A8E4A0; color: #212121'
 }
 </script>
 

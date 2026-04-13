@@ -18,6 +18,12 @@ enum ReviewStatus {
   REJECTED
 }
 
+/// Группа в фильтре «фронтенд / бэкенд» на карте (задаётся в админке)
+enum TechStackGroup {
+  FRONTEND
+  BACKEND
+}
+
 model User {
   id              String    @id @default(cuid())
   email           String    @unique
@@ -64,6 +70,7 @@ model TechnologyIcon {
   name     String  @unique
   /// Относительный путь: uploads/tech-icons/... (null — иконка не загружена)
   iconPath String?
+  stackGroup TechStackGroup @default(BACKEND)
 }
 
 /// Справочник вузов (имена совпадают со строками в company.universities JSON)

@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { useCompaniesStore } from '../stores/companies'
 
 const props = defineProps({
   technology: {
@@ -21,21 +21,16 @@ const props = defineProps({
   }
 })
 
-// классификация технологий на фронтенд и бэкенд на основе реальных технологий компаний
-const frontendTechs = ['Vue', 'React', 'TypeScript', 'Flutter']
-const backendTechs = ['PHP', 'C#', 'C++', 'Python', 'FastAPI', 'Laravel', 'Kotlin', 'Entity']
-const otherTechs = ['Битрикс', '1C CRM']
+const store = useCompaniesStore()
 
 function getTechStyle() {
   if (!props.isSelected) {
     return 'background-color: #F3F4F6; color: #212121'
   }
-  
-  if (backendTechs.includes(props.technology) || otherTechs.includes(props.technology)) {
-    return 'background-color: #A8E4A0; color: #212121'
+  if (store.isFrontendTechnology(props.technology)) {
+    return 'background-color: #1D4ED8; color: #ffffff'
   }
-  
-  return 'background-color: #1D4ED8; color: #ffffff'
+  return 'background-color: #A8E4A0; color: #212121'
 }
 </script>
 

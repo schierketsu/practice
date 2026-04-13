@@ -11,7 +11,7 @@ import {
   toUploadsUrl,
 } from '../lib/technologyCatalog.js'
 import { companyWriteSchema } from '../lib/validation.js'
-import { Prisma, ReviewStatus, Role } from '@prisma/client'
+import { Prisma, ReviewStatus, Role, TechStackGroup } from '@prisma/client'
 import type { AuthedRequest } from '../middleware/auth.js'
 import { requireAuth, requireAdmin } from '../middleware/auth.js'
 import adminUniversitiesRoutes, {
@@ -98,6 +98,12 @@ const patchUserSchema = z.object({
 
 const technologyCreateBody = z.object({
   name: z.string().trim().min(1).max(80),
+  stackGroup: z.enum(['FRONTEND', 'BACKEND']).optional(),
+})
+
+const technologyStackPatchBody = z.object({
+  name: z.string().trim().min(1).max(80),
+  stackGroup: z.enum(['FRONTEND', 'BACKEND']),
 })
 
 const patchReviewSchema = z.object({
@@ -146,6 +152,7 @@ router.get('/technology-icons', async (_req, res) => {
     icons: rows.map((r) => ({
       name: r.name,
       url: r.iconPath ? toUploadsUrl(r.iconPath) : null,
+      stackGroup: r.stackGroup,
     })),
   })
 })
@@ -156,12 +163,38 @@ router.post('/technologies', async (req, res) => {
     return res.status(400).json({ error: 'Ошибка валидации', details: parsed.error.flatten() })
   }
   try {
+    const stackGroup =
+      parsed.data.stackGroup === 'FRONTEND' ? TechStackGroup.FRONTEND : TechStackGroup.BACKEND
     const row = await prisma.technologyIcon.create({
-      data: { name: parsed.data.name, iconPath: null },
+      data: {
+        name: parsed.data.name,
+        iconPath: null,
+        stackGroup,
+      },
     })
-    return res.status(201).json({ technology: { name: row.name, url: null } })
+    return res.status(201).json({
+      technology: { name: row.name, url: null, stackGroup: row.stackGroup },
+    })
   } catch {
     return res.status(409).json({ error: 'Технология с таким именем уже есть' })
+  }
+})
+
+router.patch('/technologies/stack-group', async (req, res) => {
+  const parsed = technologyStackPatchBody.safeParse(req.body)
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Ошибка валидации', details: parsed.error.flatten() })
+  }
+  const stackGroup =
+    parsed.data.stackGroup === 'FRONTEND' ? TechStackGroup.FRONTEND : TechStackGroup.BACKEND
+  try {
+    const row = await prisma.technologyIcon.update({
+      where: { name: parsed.data.name },
+      data: { stackGroup },
+    })
+    return res.json({ technology: { name: row.name, stackGroup: row.stackGroup } })
+  } catch {
+    return res.status(404).json({ error: 'Технология не найдена в справочнике' })
   }
 })
 
@@ -204,7 +237,7 @@ router.post('/uploads/tech-icon', (req, res, next) => {
   const rel = path.join('tech-icons', f.filename).replace(/\\/g, '/')
   await prisma.technologyIcon.upsert({
     where: { name },
-    create: { name, iconPath: rel },
+    create: { name, iconPath: rel, stackGroup: TechStackGroup.BACKEND },
     update: { iconPath: rel },
   })
   return res.json({ name, url: `/uploads/${rel}` })

@@ -31,6 +31,7 @@ app.get('/api/technologies', async (_req, res) => {
       technologies: rows.map((r) => ({
         name: r.name,
         iconUrl: r.iconPath ? toUploadsUrl(r.iconPath) : null,
+        stackGroup: r.stackGroup,
       })),
     })
   } catch (e) {

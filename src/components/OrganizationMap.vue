@@ -117,9 +117,6 @@ const CAMERA_DURATION_MS = 1600
 const filteredCompanies = computed(() => store.filteredCompanies)
 const isDark = computed(() => themeStore.isDark)
 
-const backendTechs = ['PHP', 'C#', 'C++', 'Python', 'FastAPI', 'Laravel', 'Kotlin', 'Entity']
-const otherTechs = ['Битрикс', '1C CRM']
-
 /** Мобильная нижняя панель вместо попапа у метки (< sm); id — в Pinia для сброса с кнопки фильтров */
 const isMobileUi = ref(false)
 const sheetLogoError = ref(false)
@@ -167,10 +164,10 @@ function getTechStyleVue(tech) {
       color: isDark.value ? '#ffffff' : '#212121',
     }
   }
-  if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
-    return { backgroundColor: '#A8E4A0', color: '#212121' }
+  if (store.isFrontendTechnology(tech)) {
+    return { backgroundColor: '#1D4ED8', color: '#ffffff' }
   }
-  return { backgroundColor: '#1D4ED8', color: '#ffffff' }
+  return { backgroundColor: '#A8E4A0', color: '#212121' }
 }
 
 function onSheetLogoError() {
@@ -193,10 +190,10 @@ function getTechStyle(tech, isSelected) {
       ? 'background-color: #2a2a2a; color: #ffffff'
       : 'background-color: #F3F4F6; color: #212121'
   }
-  if (backendTechs.includes(tech) || otherTechs.includes(tech)) {
-    return 'background-color: #A8E4A0; color: #212121'
+  if (store.isFrontendTechnology(tech)) {
+    return 'background-color: #1D4ED8; color: #ffffff'
   }
-  return 'background-color: #1D4ED8; color: #ffffff'
+  return 'background-color: #A8E4A0; color: #212121'
 }
 
 /** Макс. ширина попапа по ширине экрана (мобильные не разъезжаются за край) */

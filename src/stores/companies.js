@@ -60,6 +60,12 @@ export const useCompaniesStore = defineStore('companies', () => {
     return row?.iconUrl ?? null
   }
 
+  /** Группа в фильтре карты: из админки; нет в справочнике — бэкенд-колонка */
+  function isFrontendTechnology(techName) {
+    const row = technologyCatalog.value.find((t) => t.name === techName)
+    return row?.stackGroup === 'FRONTEND'
+  }
+
   async function fetchCompanies() {
     loading.value = true
     loadError.value = null
@@ -77,10 +83,8 @@ export const useCompaniesStore = defineStore('companies', () => {
     loaded.value = true
   }
 
+  /** Все названия технологий, которые реально есть у компаний (для фильтров на карте) */
   const allTechnologies = computed(() => {
-    if (technologyCatalog.value.length > 0) {
-      return technologyCatalog.value.map((t) => t.name)
-    }
     const techSet = new Set()
     companies.value.forEach((company) => {
       ;(company.technologies || []).forEach((tech) => techSet.add(tech))
@@ -234,6 +238,7 @@ export const useCompaniesStore = defineStore('companies', () => {
     technologyCatalog,
     fetchTechnologyIcons,
     techIconUrlFor,
+    isFrontendTechnology,
     getCompanyById,
     getCompanyByRouteSegment,
   }
