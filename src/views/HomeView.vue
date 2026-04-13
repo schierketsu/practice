@@ -2,8 +2,24 @@
   <div class="filters-map-layer bg-[#F9FAFB] dark:bg-[#1a1a1a]">
     <div class="filters-map-layer-inner max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 w-full pb-4 sm:pb-8">
       <div class="relative">
-        <div v-if="store.companies.length === 0" class="flex items-center justify-center min-h-[400px] sm:min-h-[500px]">
+        <div
+          v-if="!store.loaded"
+          class="flex items-center justify-center min-h-[400px] sm:min-h-[500px]"
+        >
           <p class="text-gray-500 dark:text-white text-base sm:text-lg">Загрузка...</p>
+        </div>
+        <div
+          v-else-if="store.loadError"
+          class="flex flex-col items-center justify-center gap-4 min-h-[400px] sm:min-h-[500px] px-4 text-center"
+        >
+          <p class="text-red-600 dark:text-red-400 text-base sm:text-lg max-w-md">{{ store.loadError }}</p>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg bg-[#A8E4A0] text-black font-medium hover:bg-[#98d490] transition-colors"
+            @click="retryFetch"
+          >
+            Повторить
+          </button>
         </div>
         <div v-else class="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-6">
           <!-- Фильтры слева (~40% на десктопе; контейнер max-w-screen-2xl шире max-w-7xl) -->
@@ -80,6 +96,10 @@ onMounted(async () => {
     await store.fetchCompanies()
   }
 })
+
+async function retryFetch() {
+  await store.fetchCompanies()
+}
 
 const filteredCompanies = computed(() => {
   return store.filteredCompanies

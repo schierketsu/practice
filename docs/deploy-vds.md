@@ -123,6 +123,12 @@ VITE_API_BASE=https://api.example.com npm run build
 
 ## 7. Запуск API через PM2
 
+Если команда **`pm2` не найдена**, сначала:
+
+```bash
+sudo npm install -g pm2
+```
+
 Рабочая директория должна быть **`server`**, чтобы читались `.env`, `uploads/` и путь к SQLite:
 
 ```bash
@@ -135,16 +141,30 @@ pm2 startup
 
 ---
 
-## 8. nginx: один сайт на сервере
+## 8. DNS на REG.ru для **практикастудентам.рф**
 
-Пример сайта: домен **`practice.example.com`**, API на порту **3001**.
+1. В [личном кабинете REG.ru](https://www.reg.ru/) откройте домен → раздел **DNS** (или «Управление DNS» / DNS-серверы).
+2. Если домен обслуживается DNS REG.ru, добавьте **A-записи** на **IP вашего VDS** (тот же, куда вы SSH):
+   - **`@`** (корень домена) → `155.212.170.165` (подставьте актуальный IP, если другой);
+   - при необходимости **`www`** → тот же IP — чтобы открывались и `https://практикастудентам.рф`, и `https://www.практикастудентам.рф`.
+3. Подождите распространения DNS (часто **15–60 минут**, иногда дольше). Проверка с вашего ПК: `ping практикастудентам.рф` или [dnschecker.org](https://dnschecker.org) по типу **A**.
+
+В списке записей REG.ru иногда показывают **punycode** (`xn--…`) — это нормально, тот же домен.
+
+---
+
+## 9. nginx: один сайт на сервере
+
+Домен **`практикастудентам.рф`** и **`www.практикастудентам.рф`**, API на порту **3001** (как в `server/.env`). Файл сохраняйте в **UTF-8**.
 
 Файл `/etc/nginx/sites-available/practice`:
 
 ```nginx
 server {
     listen 80;
-    server_name practice.example.com;
+    # Кириллица — для людей в браузере; punycode — тот же домен в ASCII (из REG), нужен certbot --nginx
+    server_name практикастудентам.рф www.практикастудентам.рф
+                xn--80aaapfpnbwiomskedn.xn--p1ai www.xn--80aaapfpnbwiomskedn.xn--p1ai;
 
     root /var/www/practice/dist;
     index index.html;
@@ -177,16 +197,31 @@ sudo ln -sf /etc/nginx/sites-available/practice /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-**HTTPS** (после того как DNS указывает на сервер):
+**HTTPS** (после того как **A-запись** домена указывает на VDS):
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d practice.example.com
 ```
+
+**Certbot** в параметре `-d` не принимает кириллицу — укажите **Punycode** (строка `xn--…` из карточки домена в REG). Для **практикастудентам.рф** пример:
+
+Сначала в **`server_name`** должны быть и кириллица, и **тот же punycode**, что в `-d` (скопируйте `xn--…` из ЛК REG). Иначе certbot напишет: *Could not automatically find a matching server block* — сертификат при этом может уже лежать в `/etc/letsencrypt/live/…`.
+
+```bash
+sudo certbot --nginx -d xn--80aaapfpnbwiomskedn.xn--p1ai -d www.xn--80aaapfpnbwiomskedn.xn--p1ai
+```
+
+Если выпуск прошёл, а **в nginx не вставилось** — после правки `server_name` и `sudo nginx -t && sudo systemctl reload nginx`:
+
+```bash
+sudo certbot install --cert-name xn--80aaapfpnbwiomskedn.xn--p1ai
+```
+
+Certbot сам допишет `listen 443 ssl` и пути к `fullchain.pem` / `privkey.pem`. Если `www` не нужен — уберите второй `-d` и соответствующие имена из `server_name`. В браузере по-прежнему можно открывать кириллический домен.
 
 ---
 
-## 9. Если на VDS уже есть другой сайт
+## 10. Если на VDS уже есть другой сайт
 
 Ничего не удаляйте из `sites-enabled`, что обслуживает старый проект.
 
@@ -199,7 +234,7 @@ sudo certbot --nginx -d practice.example.com
 
 ---
 
-## 10. Файрвол
+## 11. Файрвол
 
 ```bash
 sudo ufw allow OpenSSH
@@ -211,29 +246,153 @@ sudo ufw enable
 
 ---
 
-## 11. Обновление после `git push`
+## 12. Обновление сайта после `git push` (пошагово)
 
-На сервере:
+Ниже — полный цикл: вы вносите правки локально, пушите в GitHub, на VDS подтягиваете код, пересобираете фронт и API, перезапускаете процесс. Путь к проекту на сервере ниже **`/var/www/practice`**; если у вас другой — подставьте свой.
+
+### 12.1. На своём компьютере (перед сервером)
+
+1. Откройте терминал в папке проекта (где лежит `package.json` в корне и папка `server/`).
+2. Посмотрите статус:
+
+   ```bash
+   git status
+   ```
+
+3. Сохраните изменения в коммит и отправьте в репозиторий (ветка чаще всего **`main`**):
+
+   ```bash
+   git add -A
+   git commit -m "Краткое описание изменений на русском или английском"
+   git push origin main
+   ```
+
+   Если `git push` ругается на ветку, выполните то, что подскажет Git (например один раз `git push -u origin main`), либо уточните имя ветки: `git branch`.
+
+4. Дождитесь успешного push на GitHub — **пока этого нет, на сервере `git pull` не подтянет новые правки**.
+
+### 12.2. Подключение к серверу по SSH
+
+С вашего ПК (PowerShell, терминал Linux/macOS):
+
+```bash
+ssh ИМЯ_ПОЛЬЗОВАТЕЛЯ@IP_СЕРВЕРА
+```
+
+Пример: `ssh root@155.212.170.165`. Дальше все команды выполняются **уже на сервере**, пока вы не вышли из SSH (`exit`).
+
+### 12.3. Переход в каталог проекта
 
 ```bash
 cd /var/www/practice
-git pull
+```
+
+Проверка, что это нужный репозиторий:
+
+```bash
+git remote -v
+```
+
+Должен быть URL вида `https://github.com/schierketsu/practice.git` или SSH-URL того же репозитория.
+
+### 12.4. Подтянуть код с GitHub: `git pull`
+
+```bash
+git pull origin main
+```
+
+- Если ветка у вас не `main`, замените на свою (см. `git branch` на сервере).
+- Если Git просит логин/пароль по **HTTPS** — для GitHub нужен **Personal Access Token**, не пароль от аккаунта. Удобнее один раз настроить **SSH-ключ** на сервере и клонировать/пуллить по SSH.
+- При сообщении о **конфликте слияния** — на сервере вручную правятся файлы с маркерами `<<<<<<<`, затем `git add` и `git commit`. Для типичного деплоя конфликтов быть не должно, если на сервере не правили код в обход Git.
+
+### 12.5. Обновление и пересборка API (папка `server/`)
+
+```bash
+cd /var/www/practice/server
+npm ci
+npx prisma generate
+npx prisma migrate deploy
+npm run build
+```
+
+- **`npm ci`** ставит зависимости строго по lock-файлу (как на чистой установке).
+- **`prisma migrate deploy`** применяет новые миграции к SQLite по пути из `DATABASE_URL` в **`server/.env`**. Перед важными обновлениями имеет смысл скопировать файл БД в резервную копию (см. раздел 13).
+- **`npm run build`** собирает TypeScript в `server/dist/`.
+
+Перезапуск процесса в PM2:
+
+```bash
+pm2 restart practice-api
+```
+
+Если процесс **`practice-api`** ещё ни разу не создавали, сначала настройте запуск по разделу **7** (оттуда `pm2 start …`), затем в следующих обновлениях используйте только **`pm2 restart practice-api`**.
+
+Проверка API с самого сервера (порт подставьте из `PORT` в `server/.env`, чаще **3001**):
+
+```bash
+curl -sS http://127.0.0.1:3001/api/health
+```
+
+Ожидается ответ с `"ok":true`. Если ошибка — смотрите **`pm2 logs practice-api --lines 80`**.
+
+### 12.6. Сборка фронта (корень репозитория)
+
+Как в разделе **6**: если nginx отдаёт сайт с **того же домена**, что и API, **`VITE_API_BASE` не указывайте** — запросы пойдут на `/api/...` относительно сайта.
+
+```bash
+cd /var/www/practice
+npm ci
+npm run build
+```
+
+После этого обновляется каталог **`dist/`** — именно его обычно раздаёт nginx (`root …/dist`).
+
+Если API у вас на **отдельном URL**, перед `npm run build` задайте базу один раз в той же строке:
+
+```bash
+VITE_API_BASE=https://api.ваш-домен npm run build
+```
+
+### 12.7. Перезагрузка nginx
+
+Конфиг вы не меняли — достаточно перечитать его и не рвать соединения:
+
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Если **`nginx -t`** выдаёт ошибку — **не** делайте `reload`, исправьте конфиг (часто опечатка в `sites-available`).
+
+### 12.8. Проверка в браузере
+
+1. Откройте сайт по вашему домену с **`https://`**.
+2. Сделайте **жёсткое обновление** страницы (чтобы не кешировался старый JS): **Ctrl+F5** (Windows/Linux) или **Cmd+Shift+R** (macOS).
+3. В инструментах разработчика (вкладка **Сеть**) убедитесь, что запрос **`/api/companies`** (или **`/api/health`**) возвращает **200**.
+
+### 12.9. Краткая шпаргалка одним блоком
+
+Если уже всё настроено и нужно просто обновиться после `git push`:
+
+```bash
+cd /var/www/practice
+git pull origin main
 
 cd server
 npm ci
+npx prisma generate
 npx prisma migrate deploy
 npm run build
 pm2 restart practice-api
 
-cd ..
+cd /var/www/practice
 npm ci
 npm run build
-sudo systemctl reload nginx
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ---
 
-## 12. Резервное копирование
+## 13. Резервное копирование
 
 Регулярно копируйте:
 
@@ -242,7 +401,7 @@ sudo systemctl reload nginx
 
 ---
 
-## 13. Частые проблемы
+## 14. Частые проблемы
 
 | Симптом | Что проверить |
 |---------|----------------|
@@ -253,7 +412,7 @@ sudo systemctl reload nginx
 
 ---
 
-## 14. Полезные команды
+## 15. Полезные команды
 
 ```bash
 pm2 logs practice-api --lines 100

@@ -63,10 +63,10 @@ export const useCompaniesStore = defineStore('companies', () => {
   async function fetchCompanies() {
     loading.value = true
     loadError.value = null
+    loaded.value = false
     try {
       const data = await apiFetch('/api/companies', { skipAuth: true })
       companies.value = data.companies || []
-      loaded.value = true
     } catch (e) {
       loadError.value = e.message || 'Не удалось загрузить компании'
       companies.value = []
@@ -74,6 +74,7 @@ export const useCompaniesStore = defineStore('companies', () => {
       loading.value = false
     }
     await fetchTechnologyIcons()
+    loaded.value = true
   }
 
   const allTechnologies = computed(() => {
