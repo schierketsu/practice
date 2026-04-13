@@ -1,7 +1,5 @@
 /** Минимальные типы для nodemailer (без пакета @types/nodemailer). */
 declare module 'nodemailer' {
-  import type { LookupCallback, LookupOptions } from 'node:dns'
-
   export interface TransportOptions {
     host?: string
     port?: number
@@ -11,7 +9,11 @@ declare module 'nodemailer' {
     connectionTimeout?: number
     greetingTimeout?: number
     socketTimeout?: number
-    lookup?: (hostname: string, options: LookupOptions, callback: LookupCallback) => void
+    lookup?: (
+      hostname: string,
+      options: import('node:dns').LookupOptions,
+      callback: (err: NodeJS.ErrnoException | null, address: string, family: number) => void,
+    ) => void
   }
 
   export interface Transporter {

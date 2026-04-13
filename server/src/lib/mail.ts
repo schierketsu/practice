@@ -1,6 +1,7 @@
 import dns from 'node:dns'
-import type { LookupCallback, LookupOptions } from 'node:dns'
+import type { LookupOptions } from 'node:dns'
 import nodemailer from 'nodemailer'
+import type { Transporter, TransportOptions } from 'nodemailer'
 
 /** `smtp` — реальная отправка. `log` — только вывод в консоль (домашняя сеть часто блокирует SMTP). */
 export function getMailMode(): 'smtp' | 'log' {
@@ -12,10 +13,10 @@ export function getMailMode(): 'smtp' | 'log' {
  * По умолчанию резолвим SMTP только в IPv4: у части сетей IPv6 до smtp.mail.ru «висит» и даёт ETIMEDOUT.
  * Отключить: SMTP_IPV4_ONLY=false
  */
-function smtpLookup(): nodemailer.TransportOptions['lookup'] | undefined {
+function smtpLookup(): TransportOptions['lookup'] | undefined {
   const v = (process.env.SMTP_IPV4_ONLY ?? 'true').toLowerCase()
   if (v === 'false' || v === '0' || v === 'no') return undefined
-  return (hostname: string, _options: LookupOptions, callback: LookupCallback) => {
+  return (hostname: string, _options: LookupOptions, callback) => {
     dns.lookup(hostname, { family: 4 }, callback)
   }
 }
@@ -31,14 +32,14 @@ export function isMailConfigured(): boolean {
   return !!(process.env.SMTP_HOST?.trim() && process.env.SMTP_USER?.trim() && process.env.SMTP_PASS)
 }
 
-let transporter: nodemailer.Transporter | null = null
+let transporter: Transporter | null = null
 
 function smtpPort(): number {
   const n = parseInt(process.env.SMTP_PORT || '465', 10)
   return Number.isNaN(n) ? 465 : n
 }
 
-function getTransporter(): nodemailer.Transporter | null {
+function getTransporter(): Transporter | null {
   if (getMailMode() === 'log') return null
   if (!process.env.SMTP_HOST?.trim() || !process.env.SMTP_USER?.trim() || !process.env.SMTP_PASS) return null
   if (!transporter) {
