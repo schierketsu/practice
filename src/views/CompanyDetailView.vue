@@ -404,7 +404,7 @@
 
           <template v-else>
             <p v-if="!parsedContacts.email" class="text-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 rounded-lg px-3 py-2 mb-3">
-              В карточке компании в поле «Контакты» нет e-mail — отправить заявку нельзя. Обратитесь к администратору сайта.
+              Контакты компании еще не указаны, отправить заявку пока не получится :(
             </p>
             <template v-else>
               <p class="text-sm text-gray-700 dark:text-gray-300 mb-2 rounded-lg bg-gray-50 dark:bg-[#2a2a2a] px-3 py-2">
