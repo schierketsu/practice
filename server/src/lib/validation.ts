@@ -81,6 +81,10 @@ export const changePasswordSchema = z
     }
   })
 
+export const practiceApplicationSchema = z.object({
+  coverLetter: z.string().trim().min(20, 'Сопроводительное письмо — минимум 20 символов').max(8000),
+})
+
 export const createReviewSchema = z.object({
   text: z.string().trim().min(10, 'Минимум 10 символов').max(5000),
   rating: z.coerce.number().int().min(1).max(5),

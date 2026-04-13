@@ -2,7 +2,13 @@ import { Router } from 'express'
 import { prisma } from '../lib/prisma.js'
 import { findCompanyByRouteSegment } from '../lib/companyRoute.js'
 import { mapCompany } from '../lib/mapCompany.js'
-import { createReviewSchema } from '../lib/validation.js'
+import { createReviewSchema, practiceApplicationSchema } from '../lib/validation.js'
+import {
+  extractContactEmail,
+  getMailFromAddress,
+  isMailConfigured,
+  sendPracticeApplicationMail,
+} from '../lib/mail.js'
 import { ReviewStatus } from '@prisma/client'
 import type { AuthedRequest } from '../middleware/auth.js'
 import { requireAuth } from '../middleware/auth.js'
@@ -69,6 +75,53 @@ router.delete('/:id/my-review', requireAuth, async (req: AuthedRequest, res) => 
     where: { companyId: id, userId: req.user!.id },
   })
   if (result.count === 0) return res.status(404).json({ error: 'Отклик не найден' })
+  return res.status(204).end()
+})
+
+/** Заявка на практику: письмо компании на e-mail из поля «Контакты» */
+router.post('/:id/practice-application', requireAuth, async (req: AuthedRequest, res) => {
+  if (!isMailConfigured()) {
+    return res.status(503).json({ error: 'Отправка почты не настроена на сервере (SMTP).' })
+  }
+  const from = getMailFromAddress()
+  if (!from) {
+    return res.status(503).json({ error: 'Не задан адрес отправителя (MAIL_FROM или SMTP_USER).' })
+  }
+  const company = await findCompanyByRouteSegment(String(req.params.id))
+  if (!company) return res.status(404).json({ error: 'Компания не найдена' })
+  const to = extractContactEmail(company.contacts)
+  if (!to) {
+    return res.status(400).json({
+      error: 'В контактах компании не найден e-mail. Попросите организацию указать почту в поле «Контакты».',
+    })
+  }
+  const parsed = practiceApplicationSchema.safeParse(req.body)
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Ошибка валидации', details: parsed.error.flatten() })
+  }
+  const user = req.user!
+  try {
+    await sendPracticeApplicationMail({
+      to,
+      from,
+      replyTo: user.email,
+      studentFirstName: user.firstName ?? '',
+      studentLastName: user.lastName ?? '',
+      studentEmail: user.email,
+      companyName: company.name,
+      coverLetter: parsed.data.coverLetter,
+    })
+  } catch (e: unknown) {
+    console.error('practice-application mail', e)
+    const code = e && typeof e === 'object' && 'code' in e ? String((e as { code?: string }).code) : ''
+    if (code === 'ETIMEDOUT' || code === 'ECONNREFUSED' || code === 'ESOCKET') {
+      return res.status(502).json({
+        error:
+          'Не удалось подключиться к SMTP (провайдер/файрвол часто блокируют порты 465/587). Варианты: запуск API на VPS с тем же .env; либо для локальной проверки в server/.env задайте MAIL_MODE=log — письмо выведется в консоль сервера, без сети.',
+      })
+    }
+    return res.status(502).json({ error: 'Не удалось отправить письмо. Попробуйте позже.' })
+  }
   return res.status(204).end()
 })
 

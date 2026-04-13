@@ -150,7 +150,9 @@
       
       <!-- Кнопка подачи заявки -->
       <button
+        type="button"
         class="w-full py-2.5 sm:py-3 bg-[#1D4ED8] text-white rounded-b-lg rounded-t-none hover:bg-[#164bc2] transition-colors font-semibold text-sm sm:text-base lg:text-lg"
+        @click="openPracticeApplicationModal"
       >
         подать заявку на практику
       </button>
@@ -354,18 +356,109 @@
         Вернуться к списку
       </button>
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="practiceModalOpen"
+        ref="practiceOverlayRef"
+        class="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 outline-none"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="practice-modal-title"
+        tabindex="-1"
+        @pointerdown="onPracticeBackdropPointerDown"
+        @pointerup="onPracticeBackdropPointerUp"
+        @keyup.escape="closePracticeModal"
+      >
+        <div
+          class="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-xl max-w-lg w-full p-5 sm:p-6 relative border border-gray-200 dark:border-gray-600"
+          @click.stop
+        >
+          <button
+            type="button"
+            class="absolute top-3 right-3 p-2 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg"
+            aria-label="Закрыть"
+            :disabled="practiceSubmitting"
+            @click="closePracticeModal"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <h2 id="practice-modal-title" class="text-xl font-bold text-gray-900 dark:text-white mb-3 pr-10">
+            Заявка на практику
+          </h2>
+
+          <div v-if="practiceSuccess" class="space-y-4">
+            <p class="text-gray-700 dark:text-gray-300">
+              Письмо отправлено компании. Ответ обычно приходит на вашу почту, указанную в аккаунте.
+            </p>
+            <button
+              type="button"
+              class="w-full py-2.5 bg-[#1D4ED8] text-white font-semibold rounded-lg hover:bg-[#164bc2]"
+              @click="closePracticeModal"
+            >
+              Закрыть
+            </button>
+          </div>
+
+          <template v-else>
+            <p v-if="!parsedContacts.email" class="text-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 rounded-lg px-3 py-2 mb-3">
+              В карточке компании в поле «Контакты» нет e-mail — отправить заявку нельзя. Обратитесь к администратору сайта.
+            </p>
+            <template v-else>
+              <p class="text-sm text-gray-700 dark:text-gray-300 mb-2 rounded-lg bg-gray-50 dark:bg-[#2a2a2a] px-3 py-2">
+                Текст письма начнётся так:
+                <span class="italic">«Привет, я {{ studentDisplayName }}, хочу пройти у вас практику!»</span>
+              </p>
+            </template>
+            <label class="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">Сопроводительное письмо</label>
+            <textarea
+              v-model="practiceCoverLetter"
+              rows="6"
+              :disabled="!parsedContacts.email || practiceSubmitting"
+              placeholder="Расскажите, почему хотите практику у этой компании (не меньше 20 символов)"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white text-sm disabled:opacity-50"
+            />
+            <label
+              v-if="parsedContacts.email"
+              class="mt-3 flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer"
+            >
+              <input
+                v-model="practiceConfirmed"
+                type="checkbox"
+                class="mt-1 rounded border-gray-300 dark:border-gray-600"
+                :disabled="practiceSubmitting"
+              />
+              <span>Подтверждаю отправку заявки в компанию «{{ company?.name }}»</span>
+            </label>
+            <p v-if="practiceFormError" class="text-red-600 dark:text-red-400 text-sm mt-2">{{ practiceFormError }}</p>
+            <button
+              type="button"
+              class="mt-4 w-full py-2.5 bg-[#1D4ED8] text-white font-semibold rounded-lg hover:bg-[#164bc2] disabled:opacity-50"
+              :disabled="!canSubmitPracticeApplication"
+              @click="submitPracticeApplication"
+            >
+              {{ practiceSubmitting ? 'Отправка…' : 'Отправить заявку' }}
+            </button>
+          </template>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch, onMounted, reactive } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, ref, watch, onMounted, reactive, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useCompaniesStore } from '../stores/companies'
 import { useThemeStore } from '../stores/theme'
 import { useAuthStore } from '../stores/auth'
 import { apiFetch } from '../api/client'
+import { useBackdropDismiss } from '../composables/useBackdropDismiss'
 
 const route = useRoute()
+const router = useRouter()
 const store = useCompaniesStore()
 const themeStore = useThemeStore()
 const auth = useAuthStore()
@@ -385,6 +478,14 @@ const ratingHover = ref(null)
 const myReviewStatus = ref(null)
 const myReviewLoading = ref(false)
 
+const practiceModalOpen = ref(false)
+const practiceOverlayRef = ref(null)
+const practiceCoverLetter = ref('')
+const practiceConfirmed = ref(false)
+const practiceSubmitting = ref(false)
+const practiceFormError = ref('')
+const practiceSuccess = ref(false)
+
 const reviewForm = reactive({
   text: '',
   rating: 0,
@@ -396,6 +497,51 @@ const reviewForm = reactive({
 const isDark = computed(() => themeStore.isDark)
 
 const company = computed(() => store.getCompanyByRouteSegment(route.params.id))
+
+const parsedContacts = computed(() => {
+  if (!company.value) return { email: null, phone: null }
+
+  const contacts = company.value.contacts
+  const emailMatch = contacts.match(/[\w.-]+@[\w.-]+\.\w+/)
+  const phoneMatch = contacts.match(/\+?\d[\d\s()-]{7,}/)
+
+  return {
+    email: emailMatch ? emailMatch[0] : null,
+    phone: phoneMatch ? phoneMatch[0].trim() : null,
+  }
+})
+
+const studentDisplayName = computed(() => {
+  const fn = (auth.user?.firstName ?? '').trim()
+  const ln = (auth.user?.lastName ?? '').trim()
+  return fn || ln ? `${fn} ${ln}`.trim() : '… (укажите имя в профиле)'
+})
+
+const canSubmitPracticeApplication = computed(() => {
+  if (!parsedContacts.value.email || !practiceConfirmed.value || practiceSubmitting.value) return false
+  return practiceCoverLetter.value.trim().length >= 20
+})
+
+function closePracticeModal() {
+  if (practiceSubmitting.value) return
+  practiceModalOpen.value = false
+}
+
+const { onBackdropPointerDown: onPracticeBackdropPointerDown, onBackdropPointerUp: onPracticeBackdropPointerUp } =
+  useBackdropDismiss(closePracticeModal)
+
+function openPracticeApplicationModal() {
+  if (!auth.isAuthenticated) {
+    router.push({ path: '/вход', query: { redirect: route.fullPath } })
+    return
+  }
+  practiceFormError.value = ''
+  practiceSuccess.value = false
+  practiceCoverLetter.value = ''
+  practiceConfirmed.value = false
+  practiceModalOpen.value = true
+  nextTick(() => practiceOverlayRef.value?.focus())
+}
 
 watch(
   () => company.value?.id,
@@ -568,18 +714,24 @@ function handleCarouselImageError(event) {
   event.target.src = grayImgDataUri
 }
 
-const parsedContacts = computed(() => {
-  if (!company.value) return { email: null, phone: null }
-  
-  const contacts = company.value.contacts
-  const emailMatch = contacts.match(/[\w\.-]+@[\w\.-]+\.\w+/)
-  const phoneMatch = contacts.match(/\+?\d[\d\s()-]{7,}/)
-  
-  return {
-    email: emailMatch ? emailMatch[0] : null,
-    phone: phoneMatch ? phoneMatch[0].trim() : null
+async function submitPracticeApplication() {
+  practiceFormError.value = ''
+  const id = route.params.id
+  if (!id || !parsedContacts.value.email || !auth.token) return
+  practiceSubmitting.value = true
+  try {
+    await apiFetch(`/api/companies/${id}/practice-application`, {
+      method: 'POST',
+      body: { coverLetter: practiceCoverLetter.value.trim() },
+      token: auth.token,
+    })
+    practiceSuccess.value = true
+  } catch (e) {
+    practiceFormError.value = e.message || 'Не удалось отправить заявку'
+  } finally {
+    practiceSubmitting.value = false
   }
-})
+}
 
 function handleImageError(event) {
   imageError.value = true
